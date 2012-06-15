@@ -1,4 +1,4 @@
-#include "stm32f4xx_conf.h"
+#include "stm32f0xx_conf.h"
 
 int main(void)
 {
