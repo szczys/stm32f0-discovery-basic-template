@@ -1,4 +1,4 @@
-#include "stm32f0xx_conf.h"
+//#include "stm32f0xx_conf.h"
 
 int main(void)
 {
@@ -13,6 +13,8 @@ int main(void)
 //#define LED_GREEN (1 << 9) /* port C, pin 9 */
 //#define LED_ORANGE 0
 //#define LED_RED 0
+
+	RCC->AHBENR |= RCC_AHBENR_IOPCEN; // enable the clock to GPIOC
 
 	GPIOC->MODER = (1 << 16);
 	
