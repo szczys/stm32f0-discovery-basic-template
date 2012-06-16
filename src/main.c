@@ -1,10 +1,23 @@
 #include "stm32f0xx_conf.h"
 
+/*
 void TIM2_IRQHandler(void) {
   // flash on update event
   if (TIM2->SR & TIM_SR_UIF) GPIOC->ODR ^= (1 << 8);
    
   TIM2->SR = 0x0; // reset the status register
+}
+*/
+
+void SysTick_Handler(void) {
+  static uint16_t tick = 0;
+  
+  switch (tick++) {
+  	case 100:
+  		tick = 0;
+  		GPIOC->ODR ^= (1 << 8);
+  		break;
+  }
 }
 
 int main(void)
@@ -27,7 +40,8 @@ int main(void)
 
 	GPIOC->MODER = (1 << 16);
 	
-	NVIC->ISER[0] |= 1<< (TIM2_IRQn); // enable the TIM2 IRQ
+	//NVIC->ISER[0] |= 1<< (TIM2_IRQn); // enable the TIM2 IRQ
+	SysTick_Config(SystemCoreClock/100);
 	
 	TIM2->PSC = 0x0; // no prescaler, timer counts up in sync with the peripheral clock
 	TIM2->DIER |= TIM_DIER_UIE; // enable update interrupt
