@@ -41,7 +41,7 @@ The workaround is to include stm32f0xx_rcc.h in the stm32f0xx_dac.c file. That i
 
 ##Loading the image on the board
 
-If you have OpenOCD installed 'make program' can be used to flash the .bin file to the board. OpenOCD must be installed with stlink enabled. Clone the github repository and use these commands to compile/install it:
+If you have OpenOCD installed 'make program' can be used to flash the .bin file to the board. OpenOCD must be installed with stlink enabled. Clone [the git repository](http://openocd.git.sourceforge.net/git/gitweb.cgi?p=openocd/openocd;a=summary) and use these commands to compile/install it:
 
     ./bootstrap
     ./configure --prefix=/usr --enable-maintainer-mode --enable-stlink
