@@ -30,6 +30,7 @@ This template will serve as a quick-start for those who do not wish to use an ID
 
 5. extra/
    * This contains a procedure file used to write the image to the board via OpenOCD
+   * **Abstracting the extra folder:** the .cfg file in the extra folder may be placed anywhere so that multiple projects can use one file. Just change the OPENOCD_PROC_FILE variable in the Make file to match the new location.
 
 ##Loading the image on the board
 

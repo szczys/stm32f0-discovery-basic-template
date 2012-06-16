@@ -10,6 +10,9 @@ STD_PERIPH_LIB=Libraries
 # location of OpenOCD Board .cfg files (only used with 'make program')
 OPENOCD_BOARD_DIR=/usr/share/openocd/scripts/board
 
+# Configuration (cfg) file containing programming directives for OpenOCD
+OPENOCD_PROC_FILE=extra/stm32f0-openocd.cfg
+
 # that's it, no need to change anything below this line!
 
 ###################################################
@@ -51,7 +54,7 @@ $(PROJ_NAME).elf: $(SRCS)
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 	
 program: $(PROJ_NAME).bin
-	openocd -f $(OPENOCD_BOARD_DIR)/stm32f0discovery.cfg -f extra/stm32f0-openocd.cfg -c "stm_flash `pwd`/$(PROJ_NAME).bin" -c shutdown
+	openocd -f $(OPENOCD_BOARD_DIR)/stm32f0discovery.cfg -f $(OPENOCD_PROC_FILE) -c "stm_flash `pwd`/$(PROJ_NAME).bin" -c shutdown
 
 clean:
 	rm -f *.o
