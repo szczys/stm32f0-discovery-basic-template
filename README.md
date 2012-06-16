@@ -10,7 +10,6 @@ This template will serve as a quick-start for those who do not wish to use an ID
    * **Makefile** is not part of the STM release, and must be copied over if the library is upgraded.
    * **stm32f0xx_conf.h** is used to configure the peripheral library. It must be copied here if the library is upgraded. The file was file taken from the STM32F0-Discovery firmware package. It is found in the following directory:
       * Project/Demonstration/
-
    * **Abstracting the libraries:** You may place this folder anywhere you like in order to use it for multiple projects. Just change the path of the STD_PERIPH_LIB variable in the Makefile
 
 2. Device/
