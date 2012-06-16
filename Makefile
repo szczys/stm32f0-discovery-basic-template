@@ -26,7 +26,7 @@ vpath %.a Libraries
 
 ROOT=$(shell pwd)
 
-CFLAGS += -Iinc -IDevice -ILibraries/CMSIS/Device/ST/STM32F0xx/Include
+CFLAGS += -Iinc -ILibraries -ILibraries/CMSIS/Device/ST/STM32F0xx/Include
 CFLAGS += -ILibraries/CMSIS/Include -ILibraries/STM32F0xx_StdPeriph_Driver/inc
 
 SRCS += Device/startup_stm32f0xx.s # add startup file to build
