@@ -6,6 +6,9 @@ SRCS = main.c system_stm32f0xx.c
 
 PROJ_NAME=main
 
+# location of OpenOCD Board .cfg files (only used with 'make program')
+OPENOCD_BOARD_DIR=/usr/share/openocd/scripts/board
+
 # that's it, no need to change anything below this line!
 
 ###################################################
@@ -13,20 +16,20 @@ PROJ_NAME=main
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g -O2 -Wall -Tstm32_flash.ld 
+CFLAGS  = -g -O2 -Wall -TDevice/stm32_flash.ld 
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m0 -march=armv6s-m
 
 ###################################################
 
 vpath %.c src
-vpath %.a lib
+vpath %.a Libraries
 
 ROOT=$(shell pwd)
 
-CFLAGS += -Iinc -Ilib -Ilib/inc 
-CFLAGS += -Ilib/inc/core -Ilib/inc/peripherals 
+CFLAGS += -Iinc -IDevice -ILibraries/CMSIS/Device/ST/STM32F0xx/Include
+CFLAGS += -ILibraries/CMSIS/Include -ILibraries/STM32F0xx_StdPeriph_Driver/inc
 
-SRCS += lib/startup_stm32f0xx.s # add startup file to build
+SRCS += Device/startup_stm32f0xx.s # add startup file to build
 
 OBJS = $(SRCS:.c=.o)
 
@@ -37,14 +40,17 @@ OBJS = $(SRCS:.c=.o)
 all: lib proj
 
 lib:
-	$(MAKE) -C lib
+	$(MAKE) -C Libraries
 
 proj: 	$(PROJ_NAME).elf
 
 $(PROJ_NAME).elf: $(SRCS)
-	$(CC) $(CFLAGS) $^ -o $@ -Llib -lstm32f0
+	$(CC) $(CFLAGS) $^ -o $@ -LLibraries -lstm32f0
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
+	
+program: $(PROJ_NAME).bin
+	openocd -f $(OPENOCD_BOARD_DIR)/stm32f0discovery.cfg -f extra/stm32f0-openocd.cfg -c "stm_flash `pwd`/$(PROJ_NAME).bin" -c shutdown
 
 clean:
 	rm -f *.o
