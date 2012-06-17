@@ -22,12 +22,6 @@ int main(void)
 
 	SysTick_Config(SystemCoreClock/100);
 
-	TIM2->PSC = 0x0; // no prescaler, timer counts up in sync with the peripheral clock
-	TIM2->DIER |= TIM_DIER_UIE; // enable update interrupt
-	TIM2->ARR = 0x01; // count to 1 (autoreload value 1)
-	TIM2->CR1 |= TIM_CR1_ARPE | TIM_CR1_CEN; // autoreload on, counter enabled
-	TIM2->EGR = 1; // trigger update event to reload timer registers
-
 	while(1);
 
 }
