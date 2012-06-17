@@ -16,7 +16,6 @@ int main(void)
 
 	RCC->AHBENR |= RCC_AHBENR_GPIOCEN; 	// enable the clock to GPIOC
 						//(RM0091 lists this as IOPCEN, not GPIOCEN)
-	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 clock
 
 	GPIOC->MODER = (1 << 16);
 
