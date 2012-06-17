@@ -32,6 +32,7 @@ ROOT=$(shell pwd)
 
 CFLAGS += -Iinc -I$(STD_PERIPH_LIB) -I$(STD_PERIPH_LIB)/CMSIS/Device/ST/STM32F0xx/Include
 CFLAGS += -I$(STD_PERIPH_LIB)/CMSIS/Include -I$(STD_PERIPH_LIB)/STM32F0xx_StdPeriph_Driver/inc
+CFLAGS += -include$(STD_PERIPH_LIB)/stm32f0xx_conf.h
 
 SRCS += Device/startup_stm32f0xx.s # add startup file to build
 
