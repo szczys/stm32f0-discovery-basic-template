@@ -3,6 +3,8 @@ This package is for use when compiling programs for STM32F05xx ARM microcontroll
 
 This template will serve as a quick-start for those who do not wish to use an IDE, but rather develop in a text editor of choice and build from the command line. It is based on [an example template for the F4 Discovery board](http://jeremyherbert.net/get/stm32f4_getting_started) put together by Jeremy Herbert.
 
+<font color="red">ATTENTION:</font> Because of a copyright issue the linker script (Device/stm32_flash.ld) has been removed from the repository. Programs will not compile without this. I had been using this file which is found in the TrueSTUDIO folder of the STM32F0-Discovery firmware package. Read the copyright notice from the top of that file to see why it cannot be included here. I'll be looking into an open source replacement for it.
+
 ##Subfolders:
 
 1. Library/
@@ -16,6 +18,7 @@ This template will serve as a quick-start for those who do not wish to use an ID
    * Folder contains device specific files:
    * **stm32_flash.ld** is the linker script taken from the STM32F0-Discovery firmware package. It is found in the following directory:
       * Project/Demonstration/TrueSTUDIO/STM32F0-Discovery_Demo/
+      * <font color="red">This file, although necessary, is missing from this repo. Please read the notice in the header of the README.</font>
    * **startup_stm32f0xx.s** is the startup file taken from the STM32F0-Discovery firmware package. It is found in the following directory:
       * Libraries/CMSIS/ST/STM32F0xx/Source/Templates/TrueSTUDIO/
 
