@@ -20,7 +20,7 @@ OPENOCD_PROC_FILE=extra/stm32f0-openocd.cfg
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g -O2 -Wall -TDevice/ARMCMx.ld
+CFLAGS  = -g -std=c99 -O2 -Wall -TDevice/ARMCMx.ld
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m0 -march=armv6s-m
 
 ###################################################
