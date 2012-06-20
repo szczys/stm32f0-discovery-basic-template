@@ -20,7 +20,7 @@ OPENOCD_PROC_FILE=extra/stm32f0-openocd.cfg
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g -O2 -Wall -TDevice/stm32_flash.ld 
+CFLAGS  = -g -O2 -Wall -TDevice/ARMCMx.ld
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m0 -march=armv6s-m
 
 ###################################################
@@ -34,7 +34,7 @@ CFLAGS += -Iinc -I$(STD_PERIPH_LIB) -I$(STD_PERIPH_LIB)/CMSIS/Device/ST/STM32F0x
 CFLAGS += -I$(STD_PERIPH_LIB)/CMSIS/Include -I$(STD_PERIPH_LIB)/STM32F0xx_StdPeriph_Driver/inc
 CFLAGS += -include$(STD_PERIPH_LIB)/stm32f0xx_conf.h
 
-SRCS += Device/startup_stm32f0xx.s # add startup file to build
+SRCS += Device/startup_ARMCM0.s #Device/startup_stm32f0xx.s # add startup file to build
 
 OBJS = $(SRCS:.c=.o)
 
