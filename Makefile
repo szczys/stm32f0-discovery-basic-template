@@ -20,7 +20,7 @@ OPENOCD_PROC_FILE=extra/stm32f0-openocd.cfg
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g -O2 -Wall -TDevice/stm32_flash.ld 
+CFLAGS  = -g -O2 -Wall -TDevice/gcc_stm32f0xx.ld 
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m0 -march=armv6s-m
 
 ###################################################
@@ -50,7 +50,7 @@ lib:
 proj: 	$(PROJ_NAME).elf
 
 $(PROJ_NAME).elf: $(SRCS)
-	$(CC) $(CFLAGS) $^ -o $@ -L$(STD_PERIPH_LIB) -lstm32f0
+	$(CC) $(CFLAGS) $^ -o $@ -L$(STD_PERIPH_LIB) -lstm32f0 -Wl,--start-group -lgcc -lc -lm -lnosys -Wl,--end-group
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 	
