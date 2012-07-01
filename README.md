@@ -41,3 +41,14 @@ If you have OpenOCD installed 'make program' can be used to flash the .bin file 
     sudo make install
 
 If there is an error finding the .cfg file, please double-check the OPENOCD_BOARD_DIR constant at the top of the Makefile (in this template directory, not in OpenOCD).
+
+###UDEV Rule for the Discovery Board
+
+If you are not able to communicate with the STM32F0-Discovery board without root privileges you should follow the step from [the stlink repo readme file](https://github.com/texane/stlink#readme) for adding a udev rule for this hardware.
+
+##Compiling your own toolchain
+It might be best to use a precompiled toolchain liked CodeSourcery G++: Lite Edition. But if you would prefer to compile your own, give [this guide](http://www.kunen.org/uC/gnu_tool.html) a try. Just google for the source code to make sure you're using the most recent versions. GCC now comes with the core and g++ code all in one archive.
+
+###Possible compiling errors:
+   * You may encouter unfulfilled dependecies when it comes to GMP, MPFR and MPC. According to [the GCC installation Wiki](http://gcc.gnu.org/wiki/InstallingGCC) you should install the following packages: libgmp-dev libmpfr-dev libmpc-dev. If that doesn't work, read the linked Wiki for further options.
+   * If you get the error: "configure: error: Link tests are not allowed after GCC_NO_EXECUTABLES" try adding the following flags when configuring GCC: "--with-system-zlib --disable-shared"
