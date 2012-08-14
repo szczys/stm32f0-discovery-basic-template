@@ -1,6 +1,13 @@
 
+# Specify remote target
 target remote localhost:3333
-mon reset halt
-mon wait_halt 500
+
+# Reset to known state
+monitor reset halt
+monitor wait_halt 500
+
+# Set a breakpoint at main().
 break main
-cont
+
+# Run to the breakpoint.
+continue
