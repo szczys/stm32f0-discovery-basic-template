@@ -63,12 +63,18 @@ typedef enum
   BUTTON_USER = 0,
 } Button_TypeDef;
 
-typedef enum 
-{  
+typedef enum
+{
   BUTTON_MODE_GPIO = 0,
   BUTTON_MODE_EXTI = 1
 } ButtonMode_TypeDef;
-  
+
+typedef enum
+{
+  COM1 = 0,
+  COM2 = 1
+} COM_TypeDef;
+
 /**
   * @}
   */ 
@@ -110,6 +116,43 @@ typedef enum
 #define USER_BUTTON_EXTI_PIN_SOURCE    EXTI_PinSource0
 #define USER_BUTTON_EXTI_IRQn          EXTI0_1_IRQn 
 
+/** @addtogroup STM32F0-DISCOVERY_LOW_LEVEL_COM
+ * @{
+ */
+#define COMn                             1
+
+/**
+* @brief Definition for COM port1, connected to USART1
+*/
+#define EVAL_COM1                        USART1
+#define EVAL_COM1_CLK                    RCC_APB2Periph_USART1
+
+#define EVAL_COM1_TX_PIN                 GPIO_Pin_9
+#define EVAL_COM1_TX_GPIO_PORT           GPIOA
+#define EVAL_COM1_TX_GPIO_CLK            RCC_AHBPeriph_GPIOA
+#define EVAL_COM1_TX_SOURCE              GPIO_PinSource9
+#define EVAL_COM1_TX_AF                  GPIO_AF_1
+
+#define EVAL_COM1_RX_PIN                 GPIO_Pin_10
+#define EVAL_COM1_RX_GPIO_PORT           GPIOA
+#define EVAL_COM1_RX_GPIO_CLK            RCC_AHBPeriph_GPIOA
+#define EVAL_COM1_RX_SOURCE              GPIO_PinSource10
+#define EVAL_COM1_RX_AF                  GPIO_AF_1
+
+#define EVAL_COM1_CTS_PIN                GPIO_Pin_11
+#define EVAL_COM1_CTS_GPIO_PORT          GPIOA
+#define EVAL_COM1_CTS_GPIO_CLK           RCC_AHBPeriph_GPIOA
+#define EVAL_COM1_CTS_SOURCE             GPIO_PinSource11
+#define EVAL_COM1_CTS_AF                 GPIO_AF_1
+
+#define EVAL_COM1_RTS_PIN                GPIO_Pin_12
+#define EVAL_COM1_RTS_GPIO_PORT          GPIOA
+#define EVAL_COM1_RTS_GPIO_CLK           RCC_AHBPeriph_GPIOA
+#define EVAL_COM1_RTS_SOURCE             GPIO_PinSource12
+#define EVAL_COM1_RTS_AF                 GPIO_AF_1
+
+#define EVAL_COM1_IRQn                   USART1_IRQn
+
 /**
   * @}
   */ 
@@ -131,6 +174,7 @@ void STM_EVAL_LEDOff(Led_TypeDef Led);
 void STM_EVAL_LEDToggle(Led_TypeDef Led);
 void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode);
 uint32_t STM_EVAL_PBGetState(Button_TypeDef Button);
+void STM_EVAL_COMInit(COM_TypeDef COM, USART_InitTypeDef* USART_InitStruct);
 
 /**
   * @}
