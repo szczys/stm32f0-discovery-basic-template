@@ -1,0 +1,214 @@
+libemb/libshell
+(c) 2011-2012 Stefan Wendler
+sw@kaltpost.de
+http://gpio.kaltpost.de/
+
+
+HOWTO use
+
+Shell building C-library for ARM-Cortex-M3 based STM32 MCUs and MSPG2553 MCUs
+=============================================================================
+
+Introduction
+------------
+
+This HOWTO introduces the usage of "libshell" by walking you through some code snippets. For complete code have a look at the various test-sources in "tests/*" within "libemb". Also have a look at the API documentation generted by doxygen under the "doc/gen/html" directory of "libshell". 
+
+For this HOWTO, it is assumed, that you compiled and installed "libemb" as described in the README.
+
+
+Hardware Setup
+--------------
+
+No special hardware setup is required. You may consider using "libshell" together with "libconio", in which case you may want to connect a USB-to-serial converter to your MCU (see "libconio" and "libserial" HOWTOs for more details). 
+
+NOTE: When using the TI Launchpad, "/dev/ttyACM0" could be used as serial port, but RX/TX must be crossed on the jumper bridge of the Launchpad.
+
+Including libshell Headers
+-----------------------------
+
+To use "libshell" functionality add the following include to your sources:
+
+#include <libemb/shell/shell.h>
+
+
+Linking libshell Library
+---------------------------
+
+To link against "libshell", add the following to your linker options:
+
+-lshell
+
+
+Initializing the Hardware
+-------------------------
+
+For "libshell", no hardware initialization is needed.
+
+
+Define Shell Commands
+---------------------
+
+The core of a shell are the commands it provides. Thus, "libshell" offers a simple way to define commands with description and a callback handler for command processing. 
+
+
+* Shell Command Struct *
+
+The struct used to define commands is called "shell_cmds". Each entry for a new command must be provided with the following attributes:
+
+* Command name "cmd"              : used to identify the command
+* Command description "desc"      : used to describe your command e.g. when user requests help
+* Command callback handler "func" : function to execute for that command
+
+The example below shows the definition of the two shell commands "h" and "argt":
+
+shell_cmds my_shell_cmds = {
+     .count 	= 2,
+     .cmds	= {
+          {
+               .cmd		= "h",
+               .desc	= "list available commands",
+               .func 	= shell_cmd_help,
+          },
+          {
+               .cmd		= "argt",
+               .desc	= "print back given arguments",
+               .func 	= shell_cmd_argt,
+          },
+     },
+};
+
+Note: to later on know the total number of commands defined, "count" has to be set to the correct number. 
+
+As you can see in the example, the struct does not store information about parameters taken by an argument. Each callback handler is provided with the arguments given to a command, and the handler function itself has then later on to decide what to do if to many, to less or wrong arguments are given. 
+
+
+Write a Callback Handler
+------------------------
+
+A callback handler for a shell command must have the following format: 
+
+int (*func)(shell_cmd_args *args);
+
+The "shell_cmd_args" parameter represents the arguments given for the command. 
+
+The callback handler for our example command "h" could look something like this (we assume it used none of the given arguments):
+
+int shell_cmd_help(shell_cmd_args *args)
+{
+    // OPTIONAL: perform check on given arguments ...
+
+    int i;
+
+    for(i = 0; i < rshell_cmds.count; i++) {
+        cio_printf("%s, %s\n\r", rshell_cmds.cmds[i].cmd), rshell_cmds.cmds[i].desc);
+    }
+
+    cio_print((char *)"OK\n\r");
+
+    return 0;
+}
+
+And the callback handler for our example command "argt" could look something like this (we assume all given arguments are relevant):
+
+int shell_cmd_argt(shell_cmd_args *args)
+{
+    // OPTIONAL: perform check on given arguments ...
+
+	int i;
+
+    cio_print((char *)"OK\n\rargs given:\n\r");
+
+    for(i = 0; i < args->count; i++) {
+         cio_printf(" - %s\n\r", args->args[i].val);
+    }
+
+    return 0;
+}
+
+
+Helper Functions for Argument Processing
+----------------------------------------
+
+To make processing of arguments a little more convinient, the following mathods are provided by "libshell": 
+
+Method                Description
+------------------------------------------------------------------------
+shell_str_len         Return the length of a null terminated string
+shell_str_cmp         Comapre two strings up to a given length for each
+shell_parse_int       Parse the integer value from a given string
+
+
+* String Length *
+
+To check the length of a string call "shell_str_len" like so:
+
+char *str = "abc";
+
+int l = shell_str_len(str); 	// l = 3
+
+
+* Comapre Strings *
+
+To compare two strings use "shell_str_cmp":
+
+char *s1 = "abc";
+char *s2 = "abc";
+char *s3 = "ABC";
+char *s4 = "ABCDE";
+
+int l1 = shell_str_len(s1);
+int l2 = shell_str_len(s2);
+int l3 = shell_str_len(s3);
+int l4 = shell_str_len(s4);
+
+int r;
+
+r = shell_str_cmp(s1, s2, l1, l2); 	// r = 0
+r = shell_str_cmp(s1, s3, l1, l3); 	// r = 2
+r = shell_str_cmp(s3, s4, l3, l4); 	// r = 1
+
+
+* Parse Intgers *
+
+To parse the integer value of a string use "shell_parse_int":
+
+int i = shell_parse_int((char *)"42");	// i = 42
+ 
+
+Process Shell Commands
+----------------------
+
+Since "libshell" does not know when or from what input to process your commands, the using code has to implement and call  "shell_process" on its own. To make this an easy task, the "shell_process_cmds" helper function is provided. 
+
+For our example commandes defined in "my_shell_cms" previously, "shell_process_cmds" would be implemented as follows:
+
+int shell_process(char *cmd_line)
+{
+     return shell_process_cmds(&my_shell_cmds, cmd_line);
+}
+
+Then, when a new command line arrived from the input of your choice, just call "shell_process" with that command line as input, and "libshell" does the rest for you (check if the command is defined, call the callback function, provide arguments form the commandline to the callback):
+
+char *cmd_line = "argt 1 2 3 4"; // example cmd line
+ 
+int s = shell_process(cmd_line);
+
+The result from "shell_process" should be checked against the following return values:
+
+switch(s)
+{
+   case SHELL_PROCESS_ERR_CMD_UNKN:
+      // Unknown command
+      break;
+   case SHELL_PROCESS_ERR_ARGS_LEN:
+      // Argument to long
+      break;
+   case SHELL_PROCESS_ERR_ARGS_MAX:
+      // Too many arguments
+      break;
+   default:
+      // OK
+      break;
+}
+
