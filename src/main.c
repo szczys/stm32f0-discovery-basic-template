@@ -29,6 +29,7 @@
 #include "main.h"
 #include <stdio.h>
 #include "usart.h"
+#include "microcli.h"
 
 /** @addtogroup STM32F0_Discovery_Peripheral_Examples
   * @{
@@ -123,6 +124,10 @@ int main(void)
   printf("MicroCLI...\n");
   printf("Hello World!\n");
 
+  struct picolInterp interp;
+  picolInitInterp(&interp);
+  picolRegisterCoreCommands(&interp);
+
   while (1)
   {
       if(rx_buffer_lines_count!=0)
@@ -130,7 +135,14 @@ int main(void)
           rx_buffer_lines_count--;
           if(BufferGetLine(&U1Rx, line_buffer, LINEBUFFERSIZE) == SUCCESS)
           {
-              printf("Received: %s\n", line_buffer);
+              printf("microcli> %s\n", line_buffer);
+              //m_print("turckcli> %s", LineBuffer);
+              int retcode = picolEval(&interp, line_buffer);
+              if (interp.result[0] != '\0')
+              {
+                  printf("[%d] %s\n", retcode, interp.result);
+              }
+             printf("[end]\n");
           }
       }
 

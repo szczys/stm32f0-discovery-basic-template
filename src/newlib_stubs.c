@@ -281,3 +281,9 @@ int _write(int file, char *ptr, int len) {
     }
     return len;
 }
+
+void abort(void)
+{
+    /* Abort called */
+    while (1);
+}
