@@ -11,7 +11,7 @@
 #include "stm32f0xx_usart.h"
 #include "usart.h"
 
-extern uint32_t __get_MSP(void);
+register char * stack_ptr asm("sp");
 
 #ifndef STDOUT_USART
 #define STDOUT_USART 1
@@ -41,6 +41,7 @@ int _read(int file, char *ptr, int len);
 int _fstat(int file, struct stat *st);
 int _getpid(void);
 int _fork(void);
+void abort(void);
 void _exit(int status) {
     _write(1, "exit", 4);
     while (1) {
@@ -138,29 +139,72 @@ int _lseek(int file, int ptr, int dir) {
  Increase program data space.
  Malloc and related functions depend on this
  */
-caddr_t _sbrk(int incr) {
+//caddr_t _sbrk(int incr) {
 
-    extern char _ebss; // Defined by the linker
+//    extern char _ebss; // Defined by the linker
+//    static char *heap_end;
+//    char *prev_heap_end;
+
+//    if (heap_end == 0) {
+//        heap_end = &_ebss;
+//    }
+//    prev_heap_end = heap_end;
+
+//    char * stack = (char*) __get_MSP();
+//     if (heap_end + incr >  stack)
+//     {
+//        // _write (STDERR_FILENO, "Heap and stack collision\n", 25);
+//         errno = ENOMEM;
+//         return  (caddr_t) -1;
+//         //abort ();
+//     }
+
+//    heap_end += incr;
+//    return (caddr_t) prev_heap_end;
+
+//}
+
+//caddr_t _sbrk(int size)
+//{
+//    extern char __HeapStart;
+//    extern char __HeapLimit;
+//    static char *current_heap_end = &__HeapStart;
+//    char *previous_heap_end;
+
+//    previous_heap_end = current_heap_end;
+
+//    if (current_heap_end + size > &__HeapLimit)
+//    {
+//        errno = ENOMEM;   // don't forget to include <errno.h>
+//        return (caddr_t) - 1;
+//    }
+
+//    current_heap_end += size;
+
+//    return (caddr_t) previous_heap_end;
+//}
+
+caddr_t _sbrk(int size)
+{
+    extern char end asm("end");
     static char *heap_end;
     char *prev_heap_end;
 
-    if (heap_end == 0) {
-        heap_end = &_ebss;
-    }
+    if (heap_end == 0)
+        heap_end = &end;
+
     prev_heap_end = heap_end;
+    if (heap_end + size > stack_ptr)
+    {
+        write(STDERR_FILENO, "Heap and stack collision\n", 25);
+        abort();
+        errno = ENOMEM;
+        return (caddr_t) -1;
+    }
 
-char * stack = (char*) __get_MSP();
-     if (heap_end + incr >  stack)
-     {
-        // _write (STDERR_FILENO, "Heap and stack collision\n", 25);
-         errno = ENOMEM;
-         return  (caddr_t) -1;
-         //abort ();
-     }
+    heap_end += size;
 
-    heap_end += incr;
     return (caddr_t) prev_heap_end;
-
 }
 
 

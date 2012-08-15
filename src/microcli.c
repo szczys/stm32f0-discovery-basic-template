@@ -965,28 +965,28 @@ int microcliCommandLCD(struct picolInterp *i, int argc, char **argv, void *pd)
 
 void picolRegisterCoreCommands(struct picolInterp *i)
 {
-    int j; char *name[] = {"+", "-", "*", "/", ">", ">=", "<", "<=", "==", "!="};
-    for (j = 0; j < (int)(sizeof(name) / sizeof(char*)); j++)
-        picolRegisterCommand(i, name[j], picolCommandMath, NULL, "");
-    picolRegisterCommand(i, "set", picolCommandSet, NULL, "--> set a variable");
-    picolRegisterCommand(i, "puts", picolCommandPuts, NULL, "--> print a string");
-    picolRegisterCommand(i, "if", picolCommandIf, NULL, "--> if condition");
-    picolRegisterCommand(i, "while", picolCommandWhile, NULL, "--> loop");
-    picolRegisterCommand(i, "break", picolCommandRetCodes, NULL, "--> break");
-    picolRegisterCommand(i, "continue", picolCommandRetCodes, NULL, "--> continue");
-    picolRegisterCommand(i, "proc", picolCommandProc, NULL, "--> define a function");
-    picolRegisterCommand(i, "return", picolCommandReturn, NULL, "--> return command");
-    picolRegisterCommand(i, "list", microcliCommandList, NULL, "--> list input/output/commands/options/flags");
-    picolRegisterCommand(i, "deviceinfo", microcliCommandDevInfo, NULL, "--> Show device information");
+//    int j; char *name[] = {"+", "-", "*", "/", ">", ">=", "<", "<=", "==", "!="};
+//    for (j = 0; j < (int)(sizeof(name) / sizeof(char*)); j++)
+//        picolRegisterCommand(i, name[j], picolCommandMath, NULL, "");
+//    picolRegisterCommand(i, "set", picolCommandSet, NULL, "--> set a variable");
+//    picolRegisterCommand(i, "puts", picolCommandPuts, NULL, "--> print a string");
+//    picolRegisterCommand(i, "if", picolCommandIf, NULL, "--> if condition");
+//    picolRegisterCommand(i, "while", picolCommandWhile, NULL, "--> loop");
+//    picolRegisterCommand(i, "break", picolCommandRetCodes, NULL, "--> break");
+//    picolRegisterCommand(i, "continue", picolCommandRetCodes, NULL, "--> continue");
+//    picolRegisterCommand(i, "proc", picolCommandProc, NULL, "--> define a function");
+//    picolRegisterCommand(i, "return", picolCommandReturn, NULL, "--> return command");
+//      picolRegisterCommand(i, "list", microcliCommandList, NULL, "--> list input/output/commands/options/flags");
+      picolRegisterCommand(i, "deviceinfo", microcliCommandDevInfo, NULL, "--> Show device information");
 #ifndef PC
     // these commands won't work on the PC
-    picolRegisterCommand(i, "enable", microcliCommandEnable, NULL, "--> enable an LED or an option");
-    picolRegisterCommand(i, "disable", microcliCommandDisable, NULL, "--> disable an LED or an option");
-    picolRegisterCommand(i, "toggle", microcliCommandToggle, NULL, "--> toggle an LED");
-    picolRegisterCommand(i, "get", microcliCommandGet, NULL, "--> get LED0 or GET BUTTON1");
-    picolRegisterCommand(i, "waitfor", microcliCommandWaitFor, NULL, "--> waitfor BUTTON1, sleep until BUTTON1 is pressed");
-    picolRegisterCommand(i, "about", microcliCommandPing, NULL, "--> show a welcome message");
-    picolRegisterCommand(i, "ping", microcliCommandPing, NULL, "--> send pong back");
+//    picolRegisterCommand(i, "enable", microcliCommandEnable, NULL, "--> enable an LED or an option");
+//    picolRegisterCommand(i, "disable", microcliCommandDisable, NULL, "--> disable an LED or an option");
+//    picolRegisterCommand(i, "toggle", microcliCommandToggle, NULL, "--> toggle an LED");
+//    picolRegisterCommand(i, "get", microcliCommandGet, NULL, "--> get LED0 or GET BUTTON1");
+//    picolRegisterCommand(i, "waitfor", microcliCommandWaitFor, NULL, "--> waitfor BUTTON1, sleep until BUTTON1 is pressed");
+//    picolRegisterCommand(i, "about", microcliCommandPing, NULL, "--> show a welcome message");
+//    picolRegisterCommand(i, "ping", microcliCommandPing, NULL, "--> send pong back");
 #ifdef LCD_CONNECTED
     picolRegisterCommand(i, "lcd", microcliCommandLCD, NULL, "--> lcd 0 0 \"Hello!\"");
 #endif

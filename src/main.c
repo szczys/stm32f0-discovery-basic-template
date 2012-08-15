@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include "usart.h"
 #include "microcli.h"
+#include <stdlib.h>
 
 /** @addtogroup STM32F0_Discovery_Peripheral_Examples
   * @{
@@ -121,8 +122,19 @@ int main(void)
   Usart1Init();
 
   /* Output a message on Hyperterminal using printf function */
-  printf("MicroCLI...\n");
-  printf("Hello World!\n");
+  printf("\n\rMicroCLI...\n\r");
+  printf("microcli> \n\r");
+
+  while(1){
+      static int i=0;
+      int *p;
+          
+      p=(int *)malloc(4);
+      if(!p)break;
+      printf("%i bytes\n\r", i);
+      delay_ms(100);
+      i++;
+  }
 
   struct picolInterp interp;
   picolInitInterp(&interp);
@@ -135,14 +147,13 @@ int main(void)
           rx_buffer_lines_count--;
           if(BufferGetLine(&U1Rx, line_buffer, LINEBUFFERSIZE) == SUCCESS)
           {
-              printf("microcli> %s\n", line_buffer);
-              //m_print("turckcli> %s", LineBuffer);
+              printf("microcli> %s\n\r", line_buffer);
               int retcode = picolEval(&interp, line_buffer);
               if (interp.result[0] != '\0')
               {
                   printf("[%d] %s\n", retcode, interp.result);
               }
-             printf("[end]\n");
+              printf("[end]\n\r");
           }
       }
 
