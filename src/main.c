@@ -31,6 +31,7 @@
 #include "usart.h"
 #include <stdlib.h>
 #include "conio.h"
+#include "cli.h"
 
 /** @addtogroup STM32F0_Discovery_Peripheral_Examples
   * @{
@@ -117,10 +118,6 @@ int main(void)
   cio_printf("\n\rMicroCLI...\n\r");
   cio_printf("microcli> \n\r");
 
-//  struct picolInterp interp;
-//  picolInitInterp(&interp);
-//  picolRegisterCoreCommands(&interp);
-
   while (1)
   {
       if(rx_lines_count!=0)
@@ -129,11 +126,7 @@ int main(void)
           if(usart_readline(line_buffer, LINEBUFFERSIZE) == SUCCESS)
           {
               cio_printf("microcli> %s\n\r", line_buffer);
-//              int retcode = picolEval(&interp, line_buffer);
-//              if (interp.result[0] != '\0')
-//              {
-//                  printf("[%d] %s\n", retcode, interp.result);
-//              }
+              shell_process(line_buffer);
               cio_printf("[end]\n\r");
           }
       }
