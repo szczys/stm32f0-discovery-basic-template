@@ -115,20 +115,19 @@ int main(void)
   Usart1Init();
 
   /* Output a message on Hyperterminal using printf function */
-  cio_printf("\n\rMicroCLI...\n\r");
-  cio_printf("microcli> \n\r");
+  cio_printf("\n\r\n\rMicroCLI 0.1.0 (" __DATE__ ")\n\r"
+             "Type \"copyright\", \"credits\" or \"license\" for more information.\n\r"
+             "MicroCLI -- An embedded command line interpreter.\n\r"
+             "about            -> Introduction and overview of MicroCLI's features.\n\r"
+             "list commands    -> Get a list of the builtin commands.\n\r"
+             "help 'commandxy' -> Details about 'commandxy'.\n\r");
 
   while (1)
   {
-      if(rx_lines_count!=0)
+      // Everything is non-blocking
+      if(serve_command_promt(line_buffer, LINEBUFFERSIZE, "microcli> ")>0)
       {
-          rx_lines_count--;
-          if(usart_readline(line_buffer, LINEBUFFERSIZE) == SUCCESS)
-          {
-              cio_printf("microcli> %s\n\r", line_buffer);
-              shell_process(line_buffer);
-              cio_printf("[end]\n\r");
-          }
+          shell_process(line_buffer);
       }
 
       if(timeout_0 == 0)

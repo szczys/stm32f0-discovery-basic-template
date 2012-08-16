@@ -10,4 +10,6 @@
 */
 int shell_process(char *cmd_line);
 
+int serve_command_promt(char *buffer, int bufferLength, const char *prompt);
+
 #endif /* CLI_H_ */
