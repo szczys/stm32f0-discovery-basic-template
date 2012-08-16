@@ -7,14 +7,14 @@
 
 #ifdef BUFFERED
 //initialize buffers
-//volatile FIFO_TypeDef U1Rx, U1Tx;
 serial_rb rxbuf;
 serial_rb txbuf;
 SERIAL_RB_Q rx_rb_buf[RXBUFFSIZE];
 SERIAL_RB_Q tx_rb_buf[TXBUFFSIZE];
+#endif
+
 volatile uint8_t rx_lines_count = 0;
 volatile uint8_t tx_lines_count = 0;
-#endif
 
 void Usart1Init(void)
 {
@@ -22,8 +22,6 @@ void Usart1Init(void)
     //initialize buffers
     serial_rb_init(&rxbuf, &(rx_rb_buf[0]), RXBUFFSIZE);
     serial_rb_init(&txbuf, &(tx_rb_buf[0]), TXBUFFSIZE);
-    //BufferInit(&U1Rx);
-    //BufferInit(&U1Tx);
 #endif
 
     /* USARTx configuration ------------------------------------------------------*/
@@ -71,7 +69,6 @@ void Usart1Put(uint8_t c)
 {
 #ifdef BUFFERED
     //put char to the buffer
-    //while(BufferPut(&U1Tx, c)!=SUCCESS);
     while(serial_rb_full(&txbuf)) {}
     serial_rb_write(&txbuf, (unsigned char)c);
     //enable Transmit Data Register empty interrupt
@@ -89,8 +86,6 @@ uint8_t Usart1Get(void){
 #ifdef BUFFERED
     uint8_t c;
     //check if buffer is empty
-    //while (BufferIsEmpty(U1Rx) == SUCCESS);
-    //BufferGet(&U1Rx, &c);
     while(serial_rb_empty(&rxbuf)) {}
     c = serial_rb_read(&rxbuf);
     return c;
