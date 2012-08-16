@@ -1,0 +1,23 @@
+libemb/libconio
+(c) 2011-2012 Stefan Wendler
+sw@kaltpost.de
+http://gpio.kaltpost.de/
+
+
+Console IO C-library for ARM-Cortex-M3 based STM32 MCUs and MSP430G2553 MCUs
+============================================================================
+
+
+Introduction
+------------
+
+"libconio" is part of "libemb". It provides a simple to use API for writing text to a console. Currently the console is the first USART on the STM32 or USCI_A on the MSP430.  The library is not HW dependend since the HW part is provided by "libserial". Thus, this library is dependend on "libserial" form the "libemb" project. 
+
+For detailed building instructions see the top-level README of "libemb" 
+
+
+Usage
+-----
+
+For usage examples etc. visit the project homepage at: http://gpio.kaltpost.de/
+
