@@ -2,17 +2,18 @@
 #include "conio.h"
 #include "usart.h"
 #include "stdbool.h"
+#include <string.h>
 
-int shell_cmd_help(shell_cmd_args *args);
+int shell_cmd_list(shell_cmd_args *args);
 int shell_cmd_argt(shell_cmd_args *args);
 
 shell_cmds microcli_shell_cmds = {
      .count 	= 2,
      .cmds	= {
           {
-               .cmd		= "h",
-               .desc	= "list available commands",
-               .func 	= shell_cmd_help,
+               .cmd		= "list",
+               .desc	= "list available inputs/outputs/commands/options/flags",
+               .func 	= shell_cmd_list,
           },
           {
                .cmd		= "argt",
@@ -109,14 +110,16 @@ int shell_process(char *cmd_line)
     return ret;
 }
 
-int shell_cmd_help(shell_cmd_args *args)
+int shell_cmd_list(shell_cmd_args *args)
 {
-    // OPTIONAL: perform check on given arguments ...
-
-    int i;
-
-    for(i = 0; i < microcli_shell_cmds.count; i++) {
-        cio_printf("%s, %s\n\r", microcli_shell_cmds.cmds[i].cmd, microcli_shell_cmds.cmds[i].desc);
+    if(args->count == 1)
+    {
+        if(strcmp(args->args[0].val, "commands") >= 0)
+        {
+            for(int i = 0; i < microcli_shell_cmds.count; i++) {
+                cio_printf("%s, %s\n\r", microcli_shell_cmds.cmds[i].cmd, microcli_shell_cmds.cmds[i].desc);
+            }
+        }
     }
 
     return 0;

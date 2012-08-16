@@ -120,7 +120,7 @@ int main(void)
              "MicroCLI -- An embedded command line interpreter.\n\r"
              "about            -> Introduction and overview of MicroCLI's features.\n\r"
              "list commands    -> Get a list of the builtin commands.\n\r"
-             "help 'commandxy' -> Details about 'commandxy'.\n\r");
+             "help commandxy   -> Details about 'commandxy'.\n\r");
 
   while (1)
   {
