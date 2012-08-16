@@ -29,8 +29,8 @@
 #include "main.h"
 #include <stdio.h>
 #include "usart.h"
-#include "microcli.h"
 #include <stdlib.h>
+#include "conio.h"
 
 /** @addtogroup STM32F0_Discovery_Peripheral_Examples
   * @{
@@ -54,14 +54,6 @@ char line_buffer[LINEBUFFERSIZE];
 
 /* Private function prototypes -----------------------------------------------*/
 void delay_ms(__IO uint32_t nTime);
-
-#ifdef __GNUC__
-  /* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
-     set to 'Yes') calls __io_putchar() */
-  #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-  #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -122,38 +114,27 @@ int main(void)
   Usart1Init();
 
   /* Output a message on Hyperterminal using printf function */
-  printf("\n\rMicroCLI...\n\r");
-  printf("microcli> \n\r");
+  cio_printf("\n\rMicroCLI...\n\r");
+  cio_printf("microcli> \n\r");
 
-  while(1){
-      static int i=0;
-      int *p;
-          
-      p=(int *)malloc(4);
-      if(!p)break;
-      printf("%i bytes\n\r", i);
-      delay_ms(100);
-      i++;
-  }
-
-  struct picolInterp interp;
-  picolInitInterp(&interp);
-  picolRegisterCoreCommands(&interp);
+//  struct picolInterp interp;
+//  picolInitInterp(&interp);
+//  picolRegisterCoreCommands(&interp);
 
   while (1)
   {
-      if(rx_buffer_lines_count!=0)
+      if(rx_lines_count!=0)
       {
-          rx_buffer_lines_count--;
-          if(BufferGetLine(&U1Rx, line_buffer, LINEBUFFERSIZE) == SUCCESS)
+          rx_lines_count--;
+          if(usart_readline(line_buffer, LINEBUFFERSIZE) == SUCCESS)
           {
-              printf("microcli> %s\n\r", line_buffer);
-              int retcode = picolEval(&interp, line_buffer);
-              if (interp.result[0] != '\0')
-              {
-                  printf("[%d] %s\n", retcode, interp.result);
-              }
-              printf("[end]\n\r");
+              cio_printf("microcli> %s\n\r", line_buffer);
+//              int retcode = picolEval(&interp, line_buffer);
+//              if (interp.result[0] != '\0')
+//              {
+//                  printf("[%d] %s\n", retcode, interp.result);
+//              }
+              cio_printf("[end]\n\r");
           }
       }
 

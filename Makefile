@@ -1,5 +1,16 @@
 # put your *.o targets here, make should handle the rest!
-SRCS = $(wildcard src/*.c)
+SRCS = $(wildcard src/*.c) \
+       Libraries/libemb/libconio/src/conio_serial.c \
+       Libraries/libemb/libconio/src/conio.c \
+       Libraries/libemb/libserial/src/serial_rb.c \
+       Libraries/libemb/libshell/src/shell.c \
+
+INC = -I inc -I $(STD_PERIPH_LIB) -I $(STD_PERIPH_LIB)/CMSIS/Device/ST/STM32F0xx/Include
+INC += -I $(STD_PERIPH_LIB)/CMSIS/Include -I $(STD_PERIPH_LIB)/STM32F0xx_StdPeriph_Driver/inc
+INC += -include $(STD_PERIPH_LIB)/stm32f0xx_conf.h
+INC += -I Libraries/libemb/libserial/src/include
+INC += -I Libraries/libemb/libconio/src/include
+INC += -I Libraries/libemb/libshell/src/include
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 PROJ_NAME=main
@@ -30,6 +41,7 @@ CFLAGS  = -Wall -g -std=gnu99 -Os
 CFLAGS += -mlittle-endian -mcpu=cortex-m0  -march=armv6-m -mthumb
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Wl,--gc-sections -Wl,-Map=$(PROJ_NAME).map
+CFLAGS += $(INC)
 
 ###################################################
 
@@ -37,10 +49,6 @@ vpath %.c src
 vpath %.a $(STD_PERIPH_LIB)
 
 ROOT=$(shell pwd)
-
-CFLAGS += -I inc -I $(STD_PERIPH_LIB) -I $(STD_PERIPH_LIB)/CMSIS/Device/ST/STM32F0xx/Include
-CFLAGS += -I $(STD_PERIPH_LIB)/CMSIS/Include -I $(STD_PERIPH_LIB)/STM32F0xx_StdPeriph_Driver/inc
-CFLAGS += -include $(STD_PERIPH_LIB)/stm32f0xx_conf.h
 
 SRCS += Device/startup_stm32f0xx.s # add startup file to build
 

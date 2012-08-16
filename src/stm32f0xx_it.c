@@ -126,12 +126,20 @@ void USART1_IRQHandler(void)
   if (USART_GetITStatus(EVAL_COM1, USART_IT_RXNE) != RESET)
   {
     /* Read one byte from the receive data register */
-    c=(uint8_t)USART_ReceiveData(EVAL_COM1);
+    c=(unsigned char)USART_ReceiveData(EVAL_COM1);
+    
+    if(c=='\n' || c=='\r')
+        rx_lines_count++;
+
     #ifdef BUFFERED
       /* put char to the buffer */
-      BufferPut(&U1Rx, c);
-      if(c=='\n' || c=='\r')
-          rx_buffer_lines_count++;
+      //BufferPut(&U1Rx, c);
+      if(!serial_rb_full(&rxbuf)) {
+          serial_rb_write(&rxbuf, c);
+      }
+      else {
+          // error buffer full
+      }
     #endif
   }
 
@@ -139,10 +147,14 @@ void USART1_IRQHandler(void)
   if (USART_GetITStatus(EVAL_COM1, USART_IT_TXE) != RESET)
   {
     #ifdef BUFFERED
-      if (BufferGet(&U1Tx, &c) == SUCCESS) // if buffer read
-      {
+//      if (BufferGet(&U1Tx, &c) == SUCCESS) // if buffer read
+//      {
+//          /* Write one byte to the transmit data register */
+//          USART_SendData(EVAL_COM1, c);
+//      }
+      if(!serial_rb_empty(&txbuf)) {
           /* Write one byte to the transmit data register */
-          USART_SendData(EVAL_COM1, c);
+          USART_SendData(EVAL_COM1, (uint8_t)serial_rb_read(&txbuf));
       }
       else /* if buffer empty */
     #endif
