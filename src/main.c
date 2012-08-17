@@ -27,11 +27,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "conf.h"
 #include <stdio.h>
 #include "usart.h"
 #include <stdlib.h>
 #include "conio.h"
 #include "cli.h"
+#include "wifi.h"
 
 /** @addtogroup STM32F0_Discovery_Peripheral_Examples
   * @{
@@ -54,8 +56,6 @@ static __IO uint8_t timeout_0 = TIMEOUT_0_DEFAULT;
 char line_buffer[LINEBUFFERSIZE];
 
 /* Private function prototypes -----------------------------------------------*/
-void delay_ms(__IO uint32_t nTime);
-
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -114,21 +114,41 @@ int main(void)
 
   Usart1Init();
 
+#ifndef WIFI_CONNECTED
   /* Output a message on Hyperterminal using printf function */
-  cio_printf("\n\r\n\rMicroCLI 0.1.0 (" __DATE__ ")\n\r"
-             "Type \"copyright\", \"credits\" or \"license\" for more information.\n\r"
-             "MicroCLI -- An embedded command line interpreter.\n\r"
-             "about            -> Introduction and overview of MicroCLI's features.\n\r"
-             "list commands    -> Get a list of the builtin commands.\n\r"
-             "help commandxy   -> Details about 'commandxy'.\n\r");
+  cio_printf("%s", welcome_msg);
+#else
+  wifi_intit_pins();
+  wifi_init_ap_mode();
+#endif
 
   while (1)
-  {
-      // Everything is non-blocking
-      if(serve_command_promt(line_buffer, LINEBUFFERSIZE, "microcli> ")>0)
+  {    
+      // Everything should be non-blocking
+      
+#ifndef WIFI_CONNECTED 
+      if(serve_command_promt(line_buffer, LINEBUFFERSIZE, "microcli> ") > 0)
       {
           shell_process(line_buffer);
       }
+#else
+      if(get_wifi_msg(line_buffer, LINEBUFFERSIZE, &cid) > 0)
+      {
+          bool add_header = (cid != -1); // send back to the current connection
+          if(add_header)
+          {
+              cio_printf("\x1bS%c", cid);
+              cio_printf("microcli> %s\r\n", line_buffer);
+          }
+          shell_process(line_buffer);
+          
+          if(add_header)
+          {
+              cio_print("[end]\r\n");
+              cio_print("\x1b" "E");
+          }
+      }
+#endif
 
       if(timeout_0 == 0)
       {

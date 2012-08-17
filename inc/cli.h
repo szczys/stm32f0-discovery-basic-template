@@ -1,7 +1,7 @@
 #ifndef CLI_H_
 #define CLI_H_ 
 
-#include "shell.h"
+extern char* welcome_msg;
 
 /* "shell_process" takes a command line as input, 
     and "libshell" does the rest for you (check if 

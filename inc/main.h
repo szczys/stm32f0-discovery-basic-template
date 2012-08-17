@@ -38,6 +38,7 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void SystemTick(void);
+void delay_ms(__IO uint32_t nTime);
 
 #endif /* __MAIN_H */
 

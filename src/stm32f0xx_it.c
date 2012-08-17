@@ -130,10 +130,9 @@ void USART1_IRQHandler(void)
     
     if(c=='\n' || c=='\r')
         rx_lines_count++;
-
+    
     #ifdef BUFFERED
       /* put char to the buffer */
-      //BufferPut(&U1Rx, c);
       if(!serial_rb_full(&rxbuf)) {
           serial_rb_write(&rxbuf, c);
       }
@@ -147,11 +146,6 @@ void USART1_IRQHandler(void)
   if (USART_GetITStatus(EVAL_COM1, USART_IT_TXE) != RESET)
   {
     #ifdef BUFFERED
-//      if (BufferGet(&U1Tx, &c) == SUCCESS) // if buffer read
-//      {
-//          /* Write one byte to the transmit data register */
-//          USART_SendData(EVAL_COM1, c);
-//      }
       if(!serial_rb_empty(&txbuf)) {
           /* Write one byte to the transmit data register */
           USART_SendData(EVAL_COM1, (uint8_t)serial_rb_read(&txbuf));
