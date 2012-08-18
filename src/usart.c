@@ -18,7 +18,7 @@ volatile uint8_t rx_lines_count = 0;
 volatile uint8_t tx_lines_count = 0;
 uint32_t current_baud = 0;
 
-void Usart1Init(void)
+void usart_1_init(void)
 {
 #ifdef BUFFERED
     // initialize buffers
@@ -68,7 +68,7 @@ void Usart1Init(void)
 #endif
 }
 
-void Usart1Put(uint8_t c)
+void usart_1_put(uint8_t c)
 {
 #ifdef BUFFERED
     // put char to the buffer
@@ -85,7 +85,7 @@ void Usart1Put(uint8_t c)
 #endif
 }
 
-uint8_t Usart1Get(void)
+uint8_t usart_1_get(void)
 {
 #ifdef BUFFERED
     uint8_t c;
@@ -99,7 +99,7 @@ uint8_t Usart1Get(void)
 #endif
 }
 
-void Usart1ChangeBaud(uint32_t USART_BaudRate)
+void usart_1_change_baud(uint32_t USART_BaudRate)
 {
     /* Disnable USART */
     USART_Cmd(EVAL_COM1, DISABLE);
@@ -122,27 +122,27 @@ void Usart1ChangeBaud(uint32_t USART_BaudRate)
 
 void serial_init(unsigned int baudrate)
 {
-    Usart1Init();
+    usart_1_init();
 }
 
 void serial_send(unsigned char data)
 {
-    Usart1Put(data);
+    usart_1_put(data);
 }
 
 void serial_send_blocking(unsigned char data)
 {
-    Usart1Put(data);
+    usart_1_put(data);
 }
 
 unsigned char serial_recv()
 {
-    return (unsigned char)Usart1Get();
+    return (unsigned char)usart_1_get();
 }
 
 unsigned char serial_recv_blocking()
 {
-    return (unsigned char)Usart1Get();
+    return (unsigned char)usart_1_get();
 }
 
 uint8_t usart_readline(char *dst, uint8_t len)

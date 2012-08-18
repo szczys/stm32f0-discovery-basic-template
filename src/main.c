@@ -112,7 +112,7 @@ int main(void)
         while (1);
     }
 
-    Usart1Init();
+    usart_1_init();
 
 #ifndef WIFI_CONNECTED
     /* Output a message on Hyperterminal using printf function */

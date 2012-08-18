@@ -19,10 +19,10 @@ extern volatile uint8_t rx_lines_count;
 extern volatile uint8_t tx_lines_count;
 extern uint32_t current_baud;
 
-void Usart1Init(void);
-void Usart1Put(uint8_t c);
-uint8_t Usart1Get(void);
-void Usart1ChangeBaud(uint32_t USART_BaudRate);
+void usart_1_init(void);
+void usart_1_put(uint8_t c);
+uint8_t usart_1_get(void);
+void usart_1_change_baud(uint32_t USART_BaudRate);
 uint8_t usart_readline(char *dst, uint8_t len);
 
 #endif /* USART_H_ */
