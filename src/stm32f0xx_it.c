@@ -72,10 +72,10 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
+    /* Go to infinite loop when Hard Fault exception occurs */
+    while (1)
+    {
+    }
 }
 
 /**
@@ -103,7 +103,7 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  SystemTick();
+    SystemTick();
 }
 
 /******************************************************************************/
@@ -120,43 +120,46 @@ void SysTick_Handler(void)
   */
 void USART1_IRQHandler(void)
 {
-  uint8_t c;
+    uint8_t c;
 
-  /* if Receive interrupt */
-  if (USART_GetITStatus(EVAL_COM1, USART_IT_RXNE) != RESET)
-  {
-    /* Read one byte from the receive data register */
-    c=(unsigned char)USART_ReceiveData(EVAL_COM1);
-    
-    if(c=='\n' || c=='\r')
-        rx_lines_count++;
-    
-    #ifdef BUFFERED
-      /* put char to the buffer */
-      if(!serial_rb_full(&rxbuf)) {
-          serial_rb_write(&rxbuf, c);
-      }
-      else {
-          // error buffer full
-      }
-    #endif
-  }
-
-  /* if Transmit interrupt */
-  if (USART_GetITStatus(EVAL_COM1, USART_IT_TXE) != RESET)
-  {
-    #ifdef BUFFERED
-      if(!serial_rb_empty(&txbuf)) {
-          /* Write one byte to the transmit data register */
-          USART_SendData(EVAL_COM1, (uint8_t)serial_rb_read(&txbuf));
-      }
-      else /* if buffer empty */
-    #endif
+    /* if Receive interrupt */
+    if (USART_GetITStatus(EVAL_COM1, USART_IT_RXNE) != RESET)
     {
-      /* Disable the EVAL_COM1 Transmit Data Register empty interrupt */
-      USART_ITConfig(EVAL_COM1, USART_IT_TXE, DISABLE);
+        /* Read one byte from the receive data register */
+        c = (unsigned char)USART_ReceiveData(EVAL_COM1);
+
+        if (c == '\n' || c == '\r')
+            rx_lines_count++;
+
+#ifdef BUFFERED
+        /* put char to the buffer */
+        if (!serial_rb_full(&rxbuf))
+        {
+            serial_rb_write(&rxbuf, c);
+        }
+        else
+        {
+            // error buffer full
+        }
+#endif
     }
-  }
+
+    /* if Transmit interrupt */
+    if (USART_GetITStatus(EVAL_COM1, USART_IT_TXE) != RESET)
+    {
+#ifdef BUFFERED
+        if (!serial_rb_empty(&txbuf))
+        {
+            /* Write one byte to the transmit data register */
+            USART_SendData(EVAL_COM1, (uint8_t)serial_rb_read(&txbuf));
+        }
+        else /* if buffer empty */
+#endif
+        {
+            /* Disable the EVAL_COM1 Transmit Data Register empty interrupt */
+            USART_ITConfig(EVAL_COM1, USART_IT_TXE, DISABLE);
+        }
+    }
 }
 
 /**

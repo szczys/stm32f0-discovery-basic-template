@@ -8,7 +8,7 @@
 #include "shell.h"
 
 ///bool wifi_connected = false;
-char CID[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+char CID[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 int8_t cid = -1;
 
 void wifi_intit_pins()
@@ -24,9 +24,9 @@ void wifi_intit_pins()
     GPIO_InitStructure_WiFiReset.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure_WiFiReset.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_Init(WIFI_MOD_RESET_PORT, &GPIO_InitStructure_WiFiReset);
-    
+
     GPIO_SetBits(WIFI_MOD_RESET_PORT, WIFI_MOD_RESET_PIN);
-    
+
     /*
      * Detect boot done by:
      * - Serial 2 WiFi APP message using UART
@@ -73,7 +73,7 @@ void receive(char *expected)
         }
         idx += 1;
     }
-    if((expected[idx] !=0) && serial_rb_empty(&rxbuf))
+    if ((expected[idx] != 0) && serial_rb_empty(&rxbuf))
     {
         // no data received, red and green led are on
         STM_EVAL_LEDOff(LED4);
@@ -99,7 +99,10 @@ void wifi_init_ap_mode()
     cio_printf("%s", "AT+RESET\n");
     delay_ms(3000);
 
-    while (!serial_rb_empty(&rxbuf)) { serial_rb_read(&rxbuf);} // clear receive buffer
+    while (!serial_rb_empty(&rxbuf))
+    {
+        serial_rb_read(&rxbuf);   // clear receive buffer
+    }
 
     send_and_check("AT+WD\n", 1000, "AT+WD\n" "\r\nOK\r\n");
     send_and_check("AT+WSEC=8\n", 1000, "AT+WSEC=8\n" "\r\nOK\r\n");
@@ -135,8 +138,8 @@ uint8_t get_wifi_msg(char *buffer, int bufferLength, int8_t *cid)
     static char *p;
     enum {DEFAULT, COMMAND, CID};
     static char state = DEFAULT;
-    
-    if(!initialized)
+
+    if (!initialized)
     {
         *cid = -1;
         state = DEFAULT;
@@ -144,35 +147,35 @@ uint8_t get_wifi_msg(char *buffer, int bufferLength, int8_t *cid)
         *p = '\0';
         initialized = true;
     }
-    
+
     while (!serial_rb_empty(&rxbuf))
     {
         char c = serial_rb_read(&rxbuf);
-        
+
         switch (c)
         {
-        case '\n' :
-        case '\r' :
+        case '\n':
+        case '\r':
             initialized = false;
             return shell_str_len(buffer);
             break;
-        case '\0' :
+        case '\0':
             initialized = false;
             return 0;
             break;
         }
-        
+
         switch (state)
         {
-        case DEFAULT :
+        case DEFAULT:
             switch (c)
             {
-            case '\x1b' :
+            case '\x1b':
                 state = COMMAND;
                 break;
-            default : 
+            default:
                 if (p < buffer + bufferLength - 1 && c >= ' ' && c < 127)
-                { 
+                {
                     *p++ = c;
                     *p = '\0';
                 }
@@ -185,25 +188,25 @@ uint8_t get_wifi_msg(char *buffer, int bufferLength, int8_t *cid)
                 break;
             }
             break;
-        case COMMAND :
+        case COMMAND:
             switch (c)
             {
             case 'S' :
                 state = CID;
                 break;
-            case 'E' :
+            case 'E':
                 *p = '\0';
                 initialized = false;
                 return shell_str_len(buffer);
-            default :
+            default:
                 // throw away
                 break;
             }
             break;
-        case CID :
+        case CID:
             *cid = c;
             state = DEFAULT;
-            break; 
+            break;
         }
     }
     return 0;

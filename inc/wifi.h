@@ -12,7 +12,7 @@
 
 extern int8_t cid;
 
-/* Each connection has a unique, single-digit hexadecimal 
+/* Each connection has a unique, single-digit hexadecimal
    value (0 to F), for the CID. */
 extern char CID[];
 
