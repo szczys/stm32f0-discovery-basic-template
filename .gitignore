@@ -8,3 +8,8 @@
 *.map
 *.lst
 *.orig
+/*.config
+/*.creator
+/*.creator.user
+/*.files
+/*.includes
