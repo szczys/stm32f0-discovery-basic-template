@@ -39,6 +39,9 @@ int shell_cmd_argt(shell_cmd_args *args);
 int shell_cmd_deviceinfo(shell_cmd_args *args);
 int shell_cmd_ping(shell_cmd_args *args);
 int shell_cmd_get(shell_cmd_args *args);
+int shell_cmd_enable(shell_cmd_args *args);
+int shell_cmd_disable(shell_cmd_args *args);
+int shell_cmd_toggle(shell_cmd_args *args);
 
 #ifdef WIFI_CONNECTED
 int wifi_cmd_connect(shell_cmd_args *args);
@@ -69,18 +72,18 @@ shell_cmds microcli_shell_cmds =
         },
         {
             .cmd     = "enable",
-            .desc    = "Enable an LED or an option",
-            .func    = shell_cmd_deviceinfo,
+            .desc    = "Enable an output or an option",
+            .func    = shell_cmd_enable,
         },
         {
             .cmd     = "disable",
-            .desc    = "Disable an LED or an option",
-            .func    = shell_cmd_deviceinfo,
+            .desc    = "Disable an output or an option",
+            .func    = shell_cmd_disable,
         },
         {
             .cmd     = "toggle",
-            .desc    = "Toggle an LED",
-            .func    = shell_cmd_deviceinfo,
+            .desc    = "Toggle an output (LEDx)",
+            .func    = shell_cmd_toggle,
         },
         {
             .cmd     = "get",
@@ -150,7 +153,7 @@ list_t flags =
     .count    = 3,
     .elements = {
         {
-            .name     = "LOW_MEMOR",
+            .name     = "LOW_MEMORY",
             .value    = 0,
         },
         {
@@ -383,6 +386,61 @@ int shell_cmd_get(shell_cmd_args *args)
         if (strcmp(args->args[0].val, outputs.elements[i].name) == 0)
         {
             cio_printf("%i\r\n", GPIO_ReadOutputDataBit(GPIO_PORT[outputs.elements[i].value], GPIO_PIN[outputs.elements[i].value]));
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int shell_cmd_enable(shell_cmd_args *args)
+{
+    for (int i = 0; i < options.count; i++)
+    {
+        if (strcmp(args->args[0].val, options.elements[i].name) == 0)
+        {
+            options.elements[i].value = 1;
+            return 0;
+        }
+    }
+    for (int i = 0; i < outputs.count; i++)
+    {
+        if (strcmp(args->args[0].val, outputs.elements[i].name) == 0)
+        {
+            STM_EVAL_LEDOn(outputs.elements[i].value);
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int shell_cmd_disable(shell_cmd_args *args)
+{
+    for (int i = 0; i < options.count; i++)
+    {
+        if (strcmp(args->args[0].val, options.elements[i].name) == 0)
+        {
+            options.elements[i].value = 0;
+            return 0;
+        }
+    }
+    for (int i = 0; i < outputs.count; i++)
+    {
+        if (strcmp(args->args[0].val, outputs.elements[i].name) == 0)
+        {
+            STM_EVAL_LEDOff(outputs.elements[i].value);
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int shell_cmd_toggle(shell_cmd_args *args)
+{
+    for (int i = 0; i < outputs.count; i++)
+    {
+        if (strcmp(args->args[0].val, outputs.elements[i].name) == 0)
+        {
+            STM_EVAL_LEDToggle(outputs.elements[i].value);
             return 0;
         }
     }

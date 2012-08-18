@@ -106,11 +106,13 @@ int main(void)
             {
             case 0:
                 /* Toggle LED4 */
-                STM_EVAL_LEDToggle(LED4);
+                if (options.elements[TOGGLE_LEDS_IDX].value == 1)
+                    STM_EVAL_LEDToggle(LED4);
                 break;
             case 1:
                 /* Toggle LED3 */
-                STM_EVAL_LEDToggle(LED3);
+                if (options.elements[TOGGLE_LEDS_IDX].value == 1)
+                    STM_EVAL_LEDToggle(LED3);
                 break;
             case 2:
                 break;

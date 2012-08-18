@@ -56,8 +56,13 @@ typedef struct
 } list_t;
 
 extern char *welcome_msg;
+
+enum {LOW_MEMORY_IDX, LOW_BATTERY_IDX, BORED_IDX};
 extern list_t flags;
+
+enum {TOGGLE_LEDS_IDX, REALTIME_UPDATE_IDX};
 extern list_t options;
+
 extern list_t inputs;
 extern list_t outputs;
 
