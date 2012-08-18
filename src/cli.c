@@ -17,6 +17,9 @@ char* welcome_msg =
 
 int shell_cmd_list(shell_cmd_args *args);
 int shell_cmd_argt(shell_cmd_args *args);
+int shell_cmd_deviceinfo(shell_cmd_args *args);
+int shell_cmd_ping(shell_cmd_args *args);
+int shell_cmd_get(shell_cmd_args *args);
 
 #ifdef WIFI_CONNECTED
 int wifi_cmd_connect(shell_cmd_args *args);
@@ -28,17 +31,47 @@ int wifi_cmd_disconnect(shell_cmd_args *args);
 
 shell_cmds microcli_shell_cmds =
 {
-    .count     = 2 + WIFI_COMMANDS,
+    .count = 7 + WIFI_COMMANDS,
     .cmds  = {
         {
+            .cmd     = "argt",
+            .desc    = "Print back given arguments",
+            .func    = shell_cmd_argt,
+        },
+        {
             .cmd     = "list",
-            .desc    = "list available inputs/outputs/commands/options/flags",
+            .desc    = "List available inputs/outputs/commands/options/flags/connections",
             .func    = shell_cmd_list,
         },
         {
-            .cmd     = "argt",
-            .desc    = "print back given arguments",
-            .func    = shell_cmd_argt,
+            .cmd     = "deviceinfo",
+            .desc    = "Show device information",
+            .func    = shell_cmd_deviceinfo,
+        },
+        {
+            .cmd     = "enable",
+            .desc    = "Enable an LED or an option",
+            .func    = shell_cmd_deviceinfo,
+        },
+        {
+            .cmd     = "disable",
+            .desc    = "Disable an LED or an option",
+            .func    = shell_cmd_deviceinfo,
+        },
+        {
+            .cmd     = "toggle",
+            .desc    = "Toggle an LED",
+            .func    = shell_cmd_deviceinfo,
+        },
+        {
+            .cmd     = "get",
+            .desc    = "Get LED0 or GET BUTTON1",
+            .func    = shell_cmd_get,
+        },
+        {
+            .cmd     = "ping",
+            .desc    = "Send a 'pong' back",
+            .func    = shell_cmd_ping,
         },
 #ifdef WIFI_CONNECTED
         {
@@ -52,6 +85,78 @@ shell_cmds microcli_shell_cmds =
             .func    = wifi_cmd_disconnect,
         },
 #endif
+    },
+};
+
+list_t outputs =
+{
+    .count    = 3,
+    .elements = {
+        {
+            .name     = "LED3",
+            .value    = LED3,
+        },
+        {
+            .name     = "LED4",
+            .value    = LED4,
+        },
+        {
+            .name     = "RELAIS1",
+            .value    = LED3,
+        },
+    },
+};
+
+list_t inputs =
+{
+    .count    = 3,
+    .elements = {
+        {
+            .name     = "BUTTON1",
+            .value    = BUTTON_USER,
+        },
+        {
+            .name     = "IN_12V_1",
+            .value    = BUTTON_USER,
+        },
+        {
+            .name     = "IN_12V_2",
+            .value    = BUTTON_USER,
+        },
+    },
+};
+
+list_t flags =
+{
+    .count    = 3,
+    .elements = {
+        {
+            .name     = "LOW_MEMOR",
+            .value    = 0,
+        },
+        {
+            .name     = "LOW_BATTERY",
+            .value    = 0,
+        },
+        {
+            .name     = "I'M_BORED",
+            .value    = 1,
+        },
+    },
+};
+
+list_t options =
+{
+    .count    = 2,
+    .elements = {
+        {
+            .name     = "TOGGLE_LEDS",
+            .value    = 1,
+        },
+        {
+            .name     = "REALTIME_UPDATE",
+            .value    = 1,
+        },
     },
 };
 
@@ -141,35 +246,127 @@ int shell_process(char *cmd_line)
     return ret;
 }
 
+int shell_cmd_argt(shell_cmd_args *args)
+{
+    // OPTIONAL: perform check on given arguments ...
+
+    cio_printf((char *)"OK\r\nargs given:\r\n");
+
+    for (int i = 0; i < args->count; i++)
+    {
+        cio_printf(" - %s\r\n", args->args[i].val);
+    }
+
+    return 0;
+}
+
 int shell_cmd_list(shell_cmd_args *args)
 {
     if (args->count == 1)
     {
-        if (strcmp(args->args[0].val, "commands") >= 0)
+        if (strcmp(args->args[0].val, "commands") == 0)
         {
             for (int i = 0; i < microcli_shell_cmds.count - WIFI_COMMANDS; i++) // -2 -> don't list CONNECT, DISCONNECT
             {
                 cio_printf("%s --> %s\r\n", microcli_shell_cmds.cmds[i].cmd, microcli_shell_cmds.cmds[i].desc);
             }
         }
+        else if (strcmp(args->args[0].val, "inputs") == 0)
+        {
+            for (int i = 0; i < inputs.count; i++)
+            {
+                cio_printf("%s\r\n", inputs.elements[i].name);
+            }
+
+        }
+        else if (strcmp(args->args[0].val, "outputs") == 0)
+        {
+            for (int i = 0; i < outputs.count; i++)
+            {
+                cio_printf("%s\r\n", outputs.elements[i].name);
+            }
+
+        }
+        else if (strcmp(args->args[0].val, "options") == 0)
+        {
+            for (int i = 0; i < options.count; i++)
+            {
+                cio_printf("%s\r\n", options.elements[i].name);
+            }
+
+        }
+        else if (strcmp(args->args[0].val, "flags") == 0)
+        {
+            for (int i = 0; i < flags.count; i++)
+            {
+                cio_printf("%s\r\n", flags.elements[i].name);
+            }
+
+        }
+#ifdef WIFI_CONNECTED
+        else if (strcmp(args->args[0].val, "connections") == 0)
+        {
+            // TODO
+        }
+#endif
+        else
+        {
+            cio_printf("[1] Unknown argument: '%s'\r\n", args->args[0].val);
+        }
     }
 
     return 0;
 }
 
-int shell_cmd_argt(shell_cmd_args *args)
+int shell_cmd_deviceinfo(shell_cmd_args *args)
 {
-    // OPTIONAL: perform check on given arguments ...
+    cio_print("Device Type: F0-Discovery Demo\r\n"
+              "Hardware Revision: 1.0\r\n"
+              "Firmware Version: 1.8\r\n"
+              "URL: www.jann.cc\r\n");
+    return 0;
+}
 
-    int i;
+int shell_cmd_ping(shell_cmd_args *args)
+{
+    cio_print("pong\r\n");
+    return 0;
+}
 
-    cio_printf((char *)"OK\r\nargs given:\r\n");
-
-    for (i = 0; i < args->count; i++)
+int shell_cmd_get(shell_cmd_args *args)
+{
+    for (int i = 0; i < inputs.count; i++)
     {
-        cio_printf(" - %s\r\n", args->args[i].val);
+        if (strcmp(args->args[0].val, inputs.elements[i].name) == 0)
+        {
+            cio_printf("%i\r\n", STM_EVAL_PBGetState(inputs.elements[i].value));
+            return 0;
+        }
     }
-
+    for (int i = 0; i < flags.count; i++)
+    {
+        if (strcmp(args->args[0].val, flags.elements[i].name) == 0)
+        {
+            cio_printf("%i\r\n", flags.elements[i].value);
+            return 0;
+        }
+    }
+    for (int i = 0; i < options.count; i++)
+    {
+        if (strcmp(args->args[0].val, options.elements[i].name) == 0)
+        {
+            cio_printf("%i\r\n", options.elements[i].value);
+            return 0;
+        }
+    }
+    for (int i = 0; i < outputs.count; i++)
+    {
+        if (strcmp(args->args[0].val, outputs.elements[i].name) == 0)
+        {
+            cio_printf("%i\r\n", GPIO_ReadOutputDataBit(GPIO_PORT[outputs.elements[i].value], GPIO_PIN[outputs.elements[i].value]));
+            return 0;
+        }
+    }
     return 0;
 }
 

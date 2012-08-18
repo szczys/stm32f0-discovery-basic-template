@@ -180,6 +180,9 @@ extern "C" {
       * @}
       */
 
+    extern GPIO_TypeDef* GPIO_PORT[LEDn];
+    extern const uint16_t GPIO_PIN[LEDn];
+
 #ifdef __cplusplus
 }
 #endif
