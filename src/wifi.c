@@ -59,7 +59,7 @@ void wifi_intit_pins()
 
 }
 
-void reset_wifi_module()
+void wifi_module_reset()
 {
 
     // Unexpected reset. Possible Warm Boot(Possibly reasons:
@@ -109,7 +109,6 @@ void send_and_check(char *cmd, uint32_t sleeptime, char *expected)
 
 void wifi_init_ap_mode()
 {
-
     STM_EVAL_LEDOn(LED3);
     STM_EVAL_LEDOn(LED4);
 
@@ -150,7 +149,7 @@ void wifi_init_ap_mode()
 
 }
 
-uint8_t get_wifi_msg(char *buffer, int bufferLength, int8_t *cid)
+uint8_t wifi_get_msg(char *buffer, int bufferLength, int8_t *cid)
 {
     static char initialized = false;
     static char *p;
@@ -228,4 +227,16 @@ uint8_t get_wifi_msg(char *buffer, int bufferLength, int8_t *cid)
         }
     }
     return 0;
+}
+
+void wifi_init_connections()
+{
+    for (int i = 0; i < 16; i++)
+    {
+        wifi_connections[i].cid = CID[i];
+        strcpy(wifi_connections[i].ip, "0.0.0.0");
+        strcpy(wifi_connections[i].port, "0000");
+        wifi_connections[i].state = DISCONNECTED;
+    }
+
 }

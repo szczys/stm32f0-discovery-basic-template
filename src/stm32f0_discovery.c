@@ -10,6 +10,7 @@
   * @attention
   *
   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2012 Christian Jann</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -70,15 +71,29 @@
 /** @defgroup STM32F0_DISCOVERY_LOW_LEVEL_Private_Variables
   * @{
   */
-GPIO_TypeDef* GPIO_PORT[LEDn] = {LED3_GPIO_PORT, LED4_GPIO_PORT};
-const uint16_t GPIO_PIN[LEDn] = {LED3_PIN, LED4_PIN};
-const uint32_t GPIO_CLK[LEDn] = {LED3_GPIO_CLK, LED4_GPIO_CLK};
+GPIO_TypeDef* GPIO_PORT[LEDn] = {LED3_GPIO_PORT, LED4_GPIO_PORT,
+                                 RELAIS1_GPIO_PORT, RELAIS2_GPIO_PORT,
+                                 OUT_12V_1_GPIO_PORT, OUT_12V_2_GPIO_PORT
+                                };
+const uint16_t GPIO_PIN[LEDn] = {LED3_PIN, LED4_PIN,
+                                 RELAIS1_PIN, RELAIS2_PIN,
+                                 OUT_12V_1_PIN, OUT_12V_2_PIN
+                                };
 
-GPIO_TypeDef* BUTTON_PORT[BUTTONn] = {USER_BUTTON_GPIO_PORT};
+const uint32_t GPIO_CLK[LEDn] = {LED3_GPIO_CLK, LED4_GPIO_CLK,
+                                 RELAIS1_GPIO_CLK, RELAIS2_GPIO_CLK,
+                                 OUT_12V_1_GPIO_CLK, OUT_12V_2_GPIO_CLK
+                                };
 
-const uint16_t BUTTON_PIN[BUTTONn] = {USER_BUTTON_PIN};
+GPIO_TypeDef* BUTTON_PORT[BUTTONn] = {USER_BUTTON_GPIO_PORT, IN_12V_1_GPIO_PORT,
+                                      IN_12V_2_GPIO_PORT
+                                     };
 
-const uint32_t BUTTON_CLK[BUTTONn] = {USER_BUTTON_GPIO_CLK};
+const uint16_t BUTTON_PIN[BUTTONn] = {USER_BUTTON_PIN, IN_12V_1_PIN, IN_12V_2_PIN};
+
+const uint32_t BUTTON_CLK[BUTTONn] = {USER_BUTTON_GPIO_CLK, IN_12V_1_GPIO_CLK,
+                                      IN_12V_2_GPIO_CLK
+                                     };
 
 const uint16_t BUTTON_EXTI_LINE[BUTTONn] = {USER_BUTTON_EXTI_LINE};
 
@@ -216,7 +231,10 @@ void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
 
     /* Configure Button pin as input */
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    if (Button_Mode == BUTTON_MODE_PDOWN)
+        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    else
+        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_InitStructure.GPIO_Pin = BUTTON_PIN[Button];
     GPIO_Init(BUTTON_PORT[Button], &GPIO_InitStructure);
 
@@ -228,14 +246,14 @@ void STM_EVAL_PBInit(Button_TypeDef Button, ButtonMode_TypeDef Button_Mode)
         /* Configure Button EXTI line */
         EXTI_InitStructure.EXTI_Line = BUTTON_EXTI_LINE[Button];
         EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-        if (Button != BUTTON_USER)
-        {
+//        if (Button != BUTTON_USER)
+//        {
             EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-        }
-        else
-        {
-            EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-        }
+//        }
+//        else
+//        {
+//            EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+//        }
         EXTI_InitStructure.EXTI_LineCmd = ENABLE;
         EXTI_Init(&EXTI_InitStructure);
 

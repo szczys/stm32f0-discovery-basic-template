@@ -26,6 +26,9 @@
 #include "stm32f0xx.h"
 #include "stm32f0_discovery.h"
 
+extern __IO uint32_t uptime;
+extern __IO uint8_t UserButtonPressed;
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/

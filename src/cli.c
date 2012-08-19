@@ -25,6 +25,7 @@
 #include "stdbool.h"
 #include <string.h>
 #include "wifi.h"
+#include "main.h"
 
 char* welcome_msg =
     "\r\n\r\nMicroCLI 0.1.0 (" __DATE__ ")\r\n"
@@ -42,24 +43,21 @@ int shell_cmd_get(shell_cmd_args *args);
 int shell_cmd_enable(shell_cmd_args *args);
 int shell_cmd_disable(shell_cmd_args *args);
 int shell_cmd_toggle(shell_cmd_args *args);
+int shell_cmd_uptime(shell_cmd_args *args);
 
 #ifdef WIFI_CONNECTED
 int wifi_cmd_connect(shell_cmd_args *args);
 int wifi_cmd_disconnect(shell_cmd_args *args);
-#define WIFI_COMMANDS 2
+int wifi_cmd_error(shell_cmd_args *args);
+#define WIFI_COMMANDS 3
 #else
 #define WIFI_COMMANDS 0
 #endif
 
 shell_cmds microcli_shell_cmds =
 {
-    .count = 7 + WIFI_COMMANDS,
+    .count = 8 + WIFI_COMMANDS,
     .cmds  = {
-        {
-            .cmd     = "argt",
-            .desc    = "Print back given arguments",
-            .func    = shell_cmd_argt,
-        },
         {
             .cmd     = "list",
             .desc    = "List available inputs/outputs/commands/options/flags/connections",
@@ -95,6 +93,11 @@ shell_cmds microcli_shell_cmds =
             .desc    = "Send a 'pong' back",
             .func    = shell_cmd_ping,
         },
+        {
+            .cmd     = "uptime",
+            .desc    = "Tell how long the system has been running.",
+            .func    = shell_cmd_uptime,
+        },
 #ifdef WIFI_CONNECTED
         {
             .cmd     = "CONNECT",
@@ -106,13 +109,18 @@ shell_cmds microcli_shell_cmds =
             .desc    = "",
             .func    = wifi_cmd_disconnect,
         },
+        {
+            .cmd     = "ERROR:",
+            .desc    = "",
+            .func    = wifi_cmd_error,
+        },
 #endif
     },
 };
 
 list_t outputs =
 {
-    .count    = 3,
+    .count    = 6,
     .elements = {
         {
             .name     = "LED3",
@@ -124,7 +132,19 @@ list_t outputs =
         },
         {
             .name     = "RELAIS1",
-            .value    = LED3,
+            .value    = RELAIS1,
+        },
+        {
+            .name     = "RELAIS2",
+            .value    = RELAIS2,
+        },
+        {
+            .name     = "OUT_12V_1",
+            .value    = OUT_12V_1,
+        },
+        {
+            .name     = "OUT_12V_2",
+            .value    = OUT_12V_2,
         },
     },
 };
@@ -139,25 +159,29 @@ list_t inputs =
         },
         {
             .name     = "IN_12V_1",
-            .value    = BUTTON_USER,
+            .value    = IN_12V_1,
         },
         {
             .name     = "IN_12V_2",
-            .value    = BUTTON_USER,
+            .value    = IN_12V_2,
         },
     },
 };
 
 list_t flags =
 {
-    .count    = 3,
+    .count    = 4,
     .elements = {
         {
-            .name     = "LOW_MEMORY",
+            .name     = "NO_FREE_MEMORY",
             .value    = 0,
         },
         {
             .name     = "LOW_BATTERY",
+            .value    = 0,
+        },
+        {
+            .name     = "WIFI_MODULE_ERROR",
             .value    = 0,
         },
         {
@@ -268,20 +292,6 @@ int shell_process(char *cmd_line)
     return ret;
 }
 
-int shell_cmd_argt(shell_cmd_args *args)
-{
-    // OPTIONAL: perform check on given arguments ...
-
-    cio_printf((char *)"OK\r\nargs given:\r\n");
-
-    for (int i = 0; i < args->count; i++)
-    {
-        cio_printf(" - %s\r\n", args->args[i].val);
-    }
-
-    return 0;
-}
-
 int shell_cmd_list(shell_cmd_args *args)
 {
     if (args->count == 1)
@@ -328,7 +338,11 @@ int shell_cmd_list(shell_cmd_args *args)
 #ifdef WIFI_CONNECTED
         else if (strcmp(args->args[0].val, "connections") == 0)
         {
-            // TODO
+            cio_print("CID IP:PORT\r\n");
+            for (int i = 0; i < 16; i++)
+            {
+                cio_printf("%c   %s:%s\r\n", wifi_connections[i].cid, wifi_connections[i].ip, wifi_connections[i].port);
+            }
         }
 #endif
         else
@@ -447,6 +461,20 @@ int shell_cmd_toggle(shell_cmd_args *args)
     return 0;
 }
 
+int shell_cmd_uptime(shell_cmd_args *args)
+{
+    int seconds = ((int)(uptime)) % 60;
+    int minutes = ((int)(uptime / (60))) % 60;
+    int hours   = ((int)(uptime / (60 * 60))) % 24;
+    int days    = ((int)(uptime / (60 * 60 * 24))) % 7;
+    //int weeks   = ((int)(uptime / (60*60*24*7))) % 52;
+    int years   = ((int)(uptime / (60 * 60 * 24 * 365))) % 10;
+    //int decades = ((int)(uptime / (60*60*24*365*10)));
+    cio_printf("System Up Time: %i Years, %i Days, %i Hours, %i Minutes, %i Seconds\r\n",
+               years, days, hours, minutes, seconds);
+    return 0;
+}
+
 #ifdef WIFI_CONNECTED
 int wifi_cmd_connect(shell_cmd_args *args)
 {
@@ -459,6 +487,17 @@ int wifi_cmd_connect(shell_cmd_args *args)
 
         cio_printf("\x1bS%c%s\x1b""E", cid, welcome_msg);
         cio_printf("\x1bS%c%s\x1b""E", cid, "microcli> \r\n");
+
+        for (int i = 0; i < 16; i++)
+        {
+            if (wifi_connections[i].cid == cid)
+            {
+                strncpy(wifi_connections[i].ip, args->args[2].val, 16);
+                strncpy(wifi_connections[i].port, args->args[3].val, 10);
+                wifi_connections[i].state = CONNECTED;
+                break;
+            }
+        }
     }
     else
     {
@@ -472,13 +511,41 @@ int wifi_cmd_disconnect(shell_cmd_args *args)
     // DISCONNECT 1..F
     if (args->count == 1)
     {
-        // set to disconnect in connection list
-        // args->args[0].val[0];
+        for (int i = 0; i < 16; i++)
+        {
+            if (wifi_connections[i].cid == args->args[0].val[0])
+            {
+                strcpy(wifi_connections[i].ip, "0.0.0.0");
+                strcpy(wifi_connections[i].port, "0000");
+                wifi_connections[i].state = DISCONNECTED;
+                break;
+            }
+        }
     }
     else
     {
         cio_printf("ERROR: DISCONNECT message has wrong format\r\n");
     }
+    return 0;
+}
+
+int wifi_cmd_error(shell_cmd_args *args)
+{
+    //ERROR: Unknown command: 'ERROR: Unknown cand: ' 'On command: 'E'''T'
+    //ERROR: INVALID INPUT
+
+    //ERROR: Unknown command: 'DISCONNECT 2'
+    //ERROR: INVALID INPUT
+    flags.elements[WIFI_MODULE_ERROR_IDX].value = 1;
+
+    while (!serial_rb_empty(&rxbuf))
+        serial_rb_read(&rxbuf);   // clear receive buffer
+
+    delay_ms(2000);
+
+    while (!serial_rb_empty(&rxbuf))
+        serial_rb_read(&rxbuf);   // clear receive buffer
+
     return 0;
 }
 #endif

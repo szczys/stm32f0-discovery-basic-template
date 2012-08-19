@@ -28,6 +28,19 @@
 #define WIFI_MOD_RESET_PORT GPIOA
 #define WIFI_MOD_RESET_PIN GPIO_Pin_8
 
+enum {DISCONNECTED, CONNECTED};
+
+typedef struct
+{
+    int8_t      cid;
+    char        ip[16];
+    char        port[10];
+    uint8_t     state; // CONNECTED, DISCONNECTED
+
+} wifi_connection_t;
+
+wifi_connection_t wifi_connections[16];
+
 extern int8_t cid;
 
 /* Each connection has a unique, single-digit hexadecimal
@@ -38,11 +51,13 @@ extern char CID[];
 void wifi_intit_pins();
 
 // Reset the WiFi module via reset line
-void reset_wifi_module();
+void wifi_module_reset();
 
 // Init in Accesspoint Mode
 void wifi_init_ap_mode();
 
-uint8_t get_wifi_msg(char *buffer, int bufferLength, int8_t *cid);
+uint8_t wifi_get_msg(char *buffer, int bufferLength, int8_t *cid);
+
+void wifi_init_connections();
 
 #endif

@@ -163,6 +163,22 @@ void USART1_IRQHandler(void)
 }
 
 /**
+  * @brief  This function handles EXTI0_IRQ Handler.
+  * @param  None
+  * @retval None
+  */
+void EXTI0_1_IRQHandler(void)
+{
+    if(EXTI_GetITStatus(USER_BUTTON_EXTI_LINE) != RESET)
+    {
+        UserButtonPressed = 0x01;
+        
+        /* Clear the EXTI line pending bit */
+        EXTI_ClearITPendingBit(USER_BUTTON_EXTI_LINE);
+    }
+}
+
+/**
   * @brief  This function handles PPP interrupt request.
   * @param  None
   * @retval None

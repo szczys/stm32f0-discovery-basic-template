@@ -10,6 +10,7 @@
   * @attention
   *
   * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2012 Christian Jann</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -55,18 +56,25 @@ extern "C" {
     typedef enum
     {
         LED3 = 0,
-        LED4 = 1
+        LED4 = 1,
+        RELAIS1 = 2,
+        RELAIS2 = 3,
+        OUT_12V_1 = 4,
+        OUT_12V_2 = 5
     } Led_TypeDef;
 
     typedef enum
     {
         BUTTON_USER = 0,
+        IN_12V_1 = 1,
+        IN_12V_2 = 2
     } Button_TypeDef;
 
     typedef enum
     {
         BUTTON_MODE_GPIO = 0,
-        BUTTON_MODE_EXTI = 1
+        BUTTON_MODE_EXTI = 1,
+        BUTTON_MODE_PDOWN = 2
     } ButtonMode_TypeDef;
 
     typedef enum
@@ -86,7 +94,7 @@ extern "C" {
     /** @addtogroup STM32F0_DISCOVERY_LOW_LEVEL_LED
       * @{
       */
-#define LEDn                             2
+#define LEDn                             6
 
 #define LED3_PIN                         GPIO_Pin_9
 #define LED3_GPIO_PORT                   GPIOC
@@ -96,6 +104,22 @@ extern "C" {
 #define LED4_GPIO_PORT                   GPIOC
 #define LED4_GPIO_CLK                    RCC_AHBPeriph_GPIOC
 
+#define RELAIS1_PIN                      GPIO_Pin_0
+#define RELAIS1_GPIO_PORT                GPIOC
+#define RELAIS1_GPIO_CLK                 RCC_AHBPeriph_GPIOC
+
+#define RELAIS2_PIN                      GPIO_Pin_1
+#define RELAIS2_GPIO_PORT                GPIOC
+#define RELAIS2_GPIO_CLK                 RCC_AHBPeriph_GPIOC
+
+#define OUT_12V_1_PIN                    GPIO_Pin_2
+#define OUT_12V_1_GPIO_PORT              GPIOC
+#define OUT_12V_1_GPIO_CLK               RCC_AHBPeriph_GPIOC
+
+#define OUT_12V_2_PIN                    GPIO_Pin_3
+#define OUT_12V_2_GPIO_PORT              GPIOC
+#define OUT_12V_2_GPIO_CLK               RCC_AHBPeriph_GPIOC
+
     /**
       * @}
       */
@@ -103,7 +127,7 @@ extern "C" {
     /** @addtogroup SSTM32F0_DISCOVERY_LOW_LEVEL_BUTTON
       * @{
       */
-#define BUTTONn                          1
+#define BUTTONn                          3
 
     /**
      * @brief USER push-button
@@ -115,6 +139,14 @@ extern "C" {
 #define USER_BUTTON_EXTI_PORT_SOURCE   EXTI_PortSourceGPIOA
 #define USER_BUTTON_EXTI_PIN_SOURCE    EXTI_PinSource0
 #define USER_BUTTON_EXTI_IRQn          EXTI0_1_IRQn
+
+#define IN_12V_1_PIN                   GPIO_Pin_1
+#define IN_12V_1_GPIO_PORT             GPIOA
+#define IN_12V_1_GPIO_CLK              RCC_AHBPeriph_GPIOA
+
+#define IN_12V_2_PIN                   GPIO_Pin_2
+#define IN_12V_2_GPIO_PORT             GPIOA
+#define IN_12V_2_GPIO_CLK              RCC_AHBPeriph_GPIOA
 
     /** @addtogroup STM32F0-DISCOVERY_LOW_LEVEL_COM
      * @{
