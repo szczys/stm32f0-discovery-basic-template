@@ -200,7 +200,7 @@ list_t options =
             .value    = 1,
         },
         {
-            .name     = "REALTIME_UPDATE",
+            .name     = "REALTIME_MSG",
             .value    = 1,
         },
     },
@@ -359,6 +359,7 @@ int shell_cmd_deviceinfo(shell_cmd_args *args)
     cio_print("Device Type: F0-Discovery Demo\r\n"
               "Hardware Revision: 1.0\r\n"
               "Firmware Version: 1.8\r\n"
+              "Build date: " __DATE__ "\r\n"
               "URL: www.jann.cc\r\n");
     return 0;
 }
@@ -536,7 +537,7 @@ int wifi_cmd_error(shell_cmd_args *args)
 
     //ERROR: Unknown command: 'DISCONNECT 2'
     //ERROR: INVALID INPUT
-    flags.elements[WIFI_MODULE_ERROR_IDX].value = 1;
+    flags.elements[WIFI_MOD_ERR_IDX].value = 1;
 
     while (!serial_rb_empty(&rxbuf))
         serial_rb_read(&rxbuf);   // clear receive buffer

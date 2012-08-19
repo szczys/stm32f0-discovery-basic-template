@@ -57,10 +57,10 @@ typedef struct
 
 extern char *welcome_msg;
 
-enum {NO_FREE_MEMORY_IDX, LOW_BATTERY_IDX, WIFI_MODULE_ERROR_IDX, BORED_IDX};
+enum {NO_FREE_MEMORY_IDX, LOW_BATTERY_IDX, WIFI_MOD_ERR_IDX, BORED_IDX};
 extern list_t flags;
 
-enum {TOGGLE_LEDS_IDX, REALTIME_UPDATE_IDX};
+enum {TOGGLE_LEDS_IDX, REALTIME_MSG_IDX};
 extern list_t options;
 
 extern list_t inputs;

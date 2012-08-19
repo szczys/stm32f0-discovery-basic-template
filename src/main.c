@@ -144,7 +144,7 @@ int main(void)
             timeout_0 = TIMEOUT_0_DEFAULT;
         }
         
-        if (options.elements[REALTIME_UPDATE_IDX].value == 1)
+        if (options.elements[REALTIME_MSG_IDX].value == 1)
         {
             enum {WAITFOR_PRESSED, WAITFOR_RELEASED};
             static uint8_t what = WAITFOR_PRESSED;
@@ -178,7 +178,7 @@ int main(void)
                 {
                     if(wifi_connections[i].state == CONNECTED)
                     {
-                        cio_printf("\x1bS%c\r\n[info] %s %i\r\n\x1b""E", wifi_connections[i].cid, msg, uptime);
+                        cio_printf("\x1bS%c[info] %s %i\r\n\x1b""E", wifi_connections[i].cid, msg, uptime);
                     }
                 }
 #endif
