@@ -181,7 +181,7 @@ list_t flags =
             .value    = 0,
         },
         {
-            .name     = "WIFI_MODULE_ERROR",
+            .name     = "WIFI_MOD_ERR",
             .value    = 0,
         },
         {
