@@ -1,0 +1,23 @@
+libemb/libshell
+(c) 2011-2012 Stefan Wendler
+sw@kaltpost.de
+http://gpio.kaltpost.de/
+
+
+Shell building C-library for ARM-Cortex-M3 based STM32 MCUs and MSP430G2553 MCUs
+================================================================================
+
+
+Introduction
+------------
+
+"libshell" is part of "libemb". It provides the environment needed to build interactive (remote-) shells. It helps with defining commands and callback handlers as well as with the command and argument parsing. The library is not HW dependend and it has no dependencies to other "libemb" libraries. 
+
+For detailed building instructions see the top-level README of "libemb" 
+
+
+Usage
+-----
+
+For usage examples etc. visit the project homepage at: http://gpio.kaltpost.de/
+

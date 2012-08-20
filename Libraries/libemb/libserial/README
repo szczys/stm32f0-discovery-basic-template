@@ -1,0 +1,22 @@
+libemb/libserial
+(c) 2011-2012 Stefan Wendler
+sw@kaltpost.de
+http://gpio.kaltpost.de/
+
+
+Serial communication C-library for ARM-Cortex-M3 based STM32 MCUs and MSP430G2553 MCUs
+======================================================================================
+
+
+Introduction
+------------
+
+"libserial" is part of "libemb". It provides a simple to use API for configuring and using the first USART as an UART on the STM32 or USCI_A UART on the MSP430G2553. The STM32 version of the library depends on "libopencm3" for accessing the STM32 HW. It has no dependencies to other "libemb" libraries.  
+
+For detailed building instructions see the top-level README of "libemb" 
+
+
+Usage
+-----
+
+For usage examples etc. visit the project homepage at: http://gpio.kaltpost.de/

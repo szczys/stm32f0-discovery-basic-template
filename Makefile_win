@@ -82,7 +82,7 @@ program: $(PROJ_NAME).bin
 debug: $(PROJ_NAME).elf
 	extra/debug_nemiver.sh
 clean:
-	find . \( -name "*.orig" -or -name "*~" \) -exec rm -v "{}" \;
+	#find . \( -name "*.orig" -or -name "*~" \) -exec rm -v "{}" \;
 	rm -f *.o
 	rm -f $(PROJ_NAME).elf
 	rm -f $(PROJ_NAME).hex

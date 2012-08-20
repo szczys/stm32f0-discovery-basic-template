@@ -1,7 +1,11 @@
-#STM32F0-Discovery Application Template
-This package is for use when compiling programs for STM32F05xx ARM microcontrollers using arm-none-eabi-gcc (I'm using the [Code Sourcery G++:Lite Edition](http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/) toolchain). The Makefile in the main directory will call the Make file in the Libraries directory, thereby automatically building the STM peripheral library. However, running 'make clean' will not affect the peripherals library (the same command can be run from the Libraries directory to do this).
+#MicroCLI: A command-line interface (CLI) for the ST32F0-Discovery with WiFi and 2 Android Apps
 
-This template will serve as a quick-start for those who do not wish to use an IDE, but rather develop in a text editor of choice and build from the command line. It is based on [an example template for the F4 Discovery board](http://jeremyherbert.net/get/stm32f4_getting_started) put together by Jeremy Herbert.
+##Getting started
+
+This repository contains the source code for the ST32F0-Discovery board.
+It is based on the [STM32F0-Discovery Application Template](https://github.com/szczys/stm32f0-discovery-basic-template), so have a look at its `Readme.md`.
+
+The (German) project description with some more information is located [here](http://www.jann.cc/2012/08/13/microcli_befehlsinterpreter_auf_einem_st32f0_discovery_mit_zugriff_per_wlan.html).
 
 ##Subfolders:
 

@@ -1,0 +1,157 @@
+libemb/libconio
+(c) 2011-2012 Stefan Wendler
+sw@kaltpost.de
+http://gpio.kaltpost.de/
+
+
+HOWTO use
+
+Console IO C-library for ARM-Cortex-M3 based STM32 MCUs and MSP430G2553 MCUs
+============================================================================
+
+Introduction
+------------
+
+This HOWTO introduces the usage of "libconio" by walking you through some code snippets. For complete code have a look at the various test-sources in "tests/*" within "libemb". Also have a look at the API documentation generted by doxygen under the "doc/gen/html" directory of "libconio". 
+
+For this HOWTO, it is assumed, that you compiled and installed "libemb" as described in the README.
+
+
+Hardware Setup
+--------------
+
+No special hardware setup is required. Just connect the RX/TX (and GND) lines of your USB to serial converter to the corresponding lines of your MCU so you could see output of "libconio" or provide some input to it (since by default "libconio" uses the serial line as device).
+
+NOTE: When using the TI Launchpad, "/dev/ttyACM0" could be used as serial port, but RX/TX must be crossed on the jumper bridge of the Launchpad.
+
+Including libconio Headers
+-----------------------------
+
+To use "libconio" functionality add the following include to your sources:
+
+#include <libemb/conio/conio.h>
+
+Since "libconio" needs some device for in-/output, you also need to setup the serial line of your MCU by using "libserial" (see the corresponding HOWTO for details), and thus need to include that header too:
+
+#include <libemb/serial/serial.h>
+
+
+Linking libconio Library
+---------------------------
+
+To link against "libconio", add the following to your linker options:
+
+-lconio
+
+And for serial line support via "libserial" add the following:
+
+-lserial
+
+
+Initializing the Hardware
+-------------------------
+
+For "libconio", no hardware initialization is needed. But the serial line used by "libconio" has to be initialized. This could be easily done by using "libserial's" init functionality: 
+
+serial_init(38400);
+
+Again, for more datails on "libserial" see the corresponding HOWTO.
+
+
+Print Data
+-----------
+
+For printing out data through the underlaying hardware (by default the serial line), the following methods are available:
+
+Method                Description
+-------------------------------------------------------------------
+cio_printc            Print a single character
+cio_print             Print a string
+cio_printi            Print an integer
+cio_printb            Print an integer in its binary representation (e.g. 010111)
+cio_printf            Tiny implementaion of printf
+
+
+* Print a Single Character * 
+
+To print a single character to the device in blocking mode, use "cio_printc":
+
+cio_printc('A'); // prints A
+
+
+* Print a String * 
+
+To print a null terminated string use "cio_print":
+
+cio_print((char *)"This is a String"); // print This is ....
+
+
+* Print an Integer *
+
+For printing an integer, "cio_printi" could be used:
+
+int i; 
+i = 42;
+cio_printi(i);	// prints 42
+
+If you like to print an integer in its binary representation use "cio_printb":
+
+int i;
+i = 42; 
+cio_printb(i, 8); 	// prints 00101010
+
+Note: the second parameter for "cio_printb" is the number of bits to print. 
+
+
+* Print a Formated String *
+
+To print acording to a given format string (like printf), use "cio_printf":
+
+s = "test";
+c = 'X';
+i = -12345;
+u =  12345;
+l = -1234567890;
+n =  1234567890;
+x = 0xABCD;
+
+cio_printf("String        %s\n\r", s); // prints test
+cio_printf("Char          %c\n\r", c); // prints X
+cio_printf("Integer       %i\n\r", i); // prints -12345
+cio_printf("Unsigned      %u\n\r", u); // prints 12345
+cio_printf("Long          %l\n\r", l); // prints -1234567890
+cio_printf("uNsigned loNg %n\n\r", n); // prints 1234567890
+cio_printf("heX           %x\n\r", x); // prints ABCD
+
+Note: "cio_printf" supports the following format patterns:
+
+* String			%s
+* Char          	%c
+* Integer       	%i
+* Unsigned      	%u
+* Long          	%l
+* unsigned long 	%n
+* heX            	%x
+ 
+Specifying the number of digits for numbers is not supported!
+
+
+Read Data
+---------
+
+For reading data in form the underlaying hardware (by default the serial line), the following mehtods are available:
+
+Method                Description
+-------------------------------------------------------------------
+cio_getc              Read in a single character (blocking)
+
+To wait until a single character is received through the input device use "cio_getc":
+
+char c = cio_getc();
+
+
+Use it With a Custom Device
+---------------------------
+
+If you don't want to use the default serial line device as provided by "libserial", support for a different device could be provided easily by writing a custom implementation of the methods "cio_printc" and "cio_getc". Instead of then linking "libconio" with "cio_serio.o", use your own implementation.
+

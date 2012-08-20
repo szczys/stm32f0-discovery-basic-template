@@ -1,0 +1,168 @@
+libemb/libserial
+(c) 2011-2012 Stefan Wendler
+sw@kaltpost.de
+http://gpio.kaltpost.de/
+
+
+HOWTO use
+
+Serial communication C-library for ARM-Cortex-M3 based STM32 MCUs and MSP430G2553 MCUs
+======================================================================================
+
+Introduction
+------------
+
+This HOWTO introduces the usage of "libserial" by walking you through some code snippets. For complete code have a look at the various test-sources in "tests/*" within "libemb". Also have a look at the API documentation generted by doxygen under the "doc/gen/html" directory of "libserial". 
+
+For this HOWTO, it is assumed, that you compiled and installed "libemb" as described in the README.
+
+
+Hardware Setup
+--------------
+
+No special hardware setup is required. Just connect the RX/TX (and GND) lines of your USB to serial converter to the corresponding lines of your MCU.
+ 
+NOTE: When using the TI Launchpad, "/dev/ttyACM0" could be used as serial port, but RX/TX must be crossed on the jumper bridge of the Launchpad.
+
+Including libserial Headers
+-----------------------------
+
+To use "libserial" functionality add the following include to your sources:
+
+#include <libemb/serial/serial.h>
+
+If you intend to use the ringbuffer that comes with libserial also include:
+
+#include <libemb/serial/serial_rb.h>
+
+
+Linking libserial Library
+---------------------------
+
+To link against "libserial", add the following to your linker options:
+
+-lserial
+
+
+Initializing the Hardware
+-------------------------
+
+Before using the functionality of libserial, the UART of your MCU has to be initialized. This is done by calling:
+
+serial_init(38400);
+
+The serial_init method only takes one parameter: the desired baudrate to operate the UART with. Internally, the above method call does the following:
+
+* Configure the FIRST UART of your MCU to given baudrate@8,N,1
+* Configure the GPIOs used for RX and TX properly
+
+Note: libserial clearly comes with some limitations. Databits, parity and stopbits are not configurable, you can not select which UART to use (allways the first UART is used). The limitations are due to the fact, that in 99% of all use cases they do not matter (since the defaults are good enough). If there is need, it may be that some of the limitations will be removed in the future.
+
+Send/Receive Date 
+------------------
+
+For sending/receiving a byte to/form the serial line, the following methos are available:
+
+Method                Description
+-------------------------------------------------------------------
+serial_send           Send one byte non-blocking to the serial line
+serial_send_blocking  Send one byte blocking to the serial line
+serial_recv           Receive one byte non-blocking from the serial line
+serial_recv_blocking  Receive one byte blocking from the serial line
+
+
+* Sending Data to the Serial Line *
+
+To send a byte non-blocking:
+
+serial_send('A');
+
+Or blocking:
+
+serial_send_blocking('A');
+
+
+* Receiving Data from the Serial Line *
+
+To receive a character non-blocking:
+
+unsigned char c = serial_recv();
+
+Note: since the read is non-blocking, it will return imidiately. If there was no data to receive, "c" will contain whatever currently is stored for that memory address. Thus, using "serial_recv" is only a good idea when you are sure that there is data to read. E.g. "serial_recv" comes in handy when using an ISR for receiving.
+
+To receive a character blocking:
+
+unsiged char c = serial_recv_blocking();
+
+
+Using a Ringbuffer for Communication
+------------------------------------
+
+In many cases when using serial communications, the need for some kind of buffer arises. Thus, libserial comes with a ringbuffer implementation which e. g. could be used when doing serial communications completely interrupt driven.
+
+The ringbuffer implementatino provides the following methods:
+
+Method                Description
+-------------------------------------------------------------------
+serial_rb_init        Initialize a new ringbuffer
+serial_rb_write       Write element to a ringbuffer
+serial_rb_read        Read element from a ringbuffer
+serial_rb_full        Check if ringbuffer is full
+serial_rb_empty       Check if ringbuffer ie empty
+serial_rb_free        Get number of free ringbuffer entries
+
+* Initialize a Ringbuffer *
+
+Before using a ringbuffer you have to initialize it. This is done in the following steps:
+
+1. Define the buffer holding the data
+
+SERIAL_RB_Q rb_buf[64];
+
+2. Define the struct which holds the ringbuffers meta data (read/write position, buffer, ...)
+
+serial_rb buf;
+
+3. Initialize the ringbuffer
+
+- Pass pointer with RBs meta data
+- Pass pointer to buffer
+- Pass size of buffer
+
+serial_rb_init(&srb, &(rb_buf[0]), 64);
+
+
+* Write to a Ringbuffer * 
+
+After a ringbuffer is initialized, data could be written to it. Prior of writing data to a ringbuffer, make sure it is not full already:
+
+1. Check if RB is NOT full
+
+- Pass pointer to RBs meta data
+
+if(!serial_rb_full(&rb)) {
+	// write to RB 
+}
+
+2. Write Data to RB
+
+- Pass in RBs meta data
+- Pass in value to add to the RB
+
+serial_rb_write(&rb, 'A');
+
+
+* Read from a Ringbuffer * 
+
+Before reading from a ringbuffer, check if it is not already empty.
+
+1. Check if RB is NOT empty
+
+if(!serial_rb_empty(&rb)) {
+	// read from RB
+}
+ 
+2. Read Data from RB
+
+unsigned char c = serial_rb_read(&rb);
+

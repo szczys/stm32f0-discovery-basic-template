@@ -1,0 +1,15 @@
+/Libraries/libemb/*
+*.o
+*.elf
+*~
+*.a
+*.bin
+*.hex
+*.map
+*.lst
+*.orig
+/*.config
+/*.creator
+/*.creator.user
+/*.files
+/*.includes
