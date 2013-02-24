@@ -1,0 +1,23 @@
+# compilation results #
+#######################
+*.o
+*.a
+*.bin
+*.elf
+*.hex
+*.lst
+*.map
+
+# Makefile target files #
+#########################
+dirs
+program
+
+# Eclipse project files #
+#########################
+.project
+.cproject
+
+# Log files #
+#############
+openocd.log
