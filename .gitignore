@@ -13,10 +13,11 @@
 dirs
 program
 
-# Eclipse project files #
+# Eclipse & editor files #
 #########################
 .project
 .cproject
+*~
 
 # Log files #
 #############
