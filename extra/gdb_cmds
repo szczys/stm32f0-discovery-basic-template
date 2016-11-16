@@ -1,0 +1,3 @@
+target remote | openocd -f /usr/share/openocd/scripts/board/stm32f0discovery.cfg -c "gdb_port pipe; log_output openocd.log"
+monitor reset halt
+load

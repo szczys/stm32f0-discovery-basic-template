@@ -46,6 +46,10 @@ If there is an error finding the .cfg file, please double-check the OPENOCD_BOAR
 
 If you are not able to communicate with the STM32F0-Discovery board without root privileges you should follow the step from [the stlink repo readme file](https://github.com/texane/stlink#readme) for adding a udev rule for this hardware.
 
+##On-Chip Debugging
+
+Typing 'make debug' will launch a GDB session attached to OpenOCD.  With this, you can set breakpoints, single-step through code, print variable values...anything you can do with GDB.  See [this blog post](http://www.mjblythe.com/hacks/2013/02/debugging-stm32-with-gdb-and-openocd/) for info about how it works.
+
 ##Compiling your own toolchain
 It might be best to use a precompiled toolchain liked CodeSourcery G++: Lite Edition. But if you would prefer to compile your own, give [this guide](http://www.kunen.org/uC/gnu_tool.html) (link dead, [try the Internet Archive](https://web.archive.org/web/20140802120713/http://www.kunen.org/uC/gnu_tool.html))a try. Just google for the source code to make sure you're using the most recent versions. GCC now comes with the core and g++ code all in one archive.
 
