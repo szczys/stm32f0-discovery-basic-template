@@ -14,7 +14,7 @@ CXX=arm-none-eabi-g++
 OBJCOPY=arm-none-eabi-objcopy
 OBJDUMP=arm-none-eabi-objdump
 SIZE=arm-none-eabi-size
-LD=arm-none-eabi-g++
+LD=arm-none-eabi-gcc
 
 # Location of the linker scripts
 LINKER_SPECS := --specs=nano.specs --specs=nosys.specs
@@ -37,6 +37,7 @@ all: lib $(BUILD_DIR)/$(PROJ_NAME).elf
 
 $(BUILD_DIR)/$(PROJ_NAME).elf: $(OBJECTS)
 	$(LD) $(OBJECTS) $(CFLAGS) $(LDFLAGS) -o $@
+#	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 	$(OBJCOPY) -O ihex $(BUILD_DIR)/$(PROJ_NAME).elf $(BUILD_DIR)/$(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(BUILD_DIR)/$(PROJ_NAME).elf $(BUILD_DIR)/$(PROJ_NAME).bin
 	$(OBJDUMP) -St $(BUILD_DIR)/$(PROJ_NAME).elf >$(BUILD_DIR)/$(PROJ_NAME).lst
