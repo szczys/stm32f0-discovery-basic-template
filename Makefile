@@ -10,30 +10,33 @@ SRC := src Device
 BUILD_DIR := build
 
 CC=arm-none-eabi-gcc
+CXX=arm-none-eabi-g++
 OBJCOPY=arm-none-eabi-objcopy
 OBJDUMP=arm-none-eabi-objdump
 SIZE=arm-none-eabi-size
+LD=arm-none-eabi-g++
 
 # Location of the linker scripts
+LINKER_SPECS := --specs=nano.specs --specs=nosys.specs
 LDSCRIPT_INC=Device/ldscripts
 
-CFLAGS = $(addprefix -I,$(INC))
-LDFLAGS = -L$(STD_PERIPH_LIB) -lstm32f0 -L$(LDSCRIPT_INC) -Tstm32f0.ld
-LDFLAGS += -Wall -g -std=c99 -Os
-LDFLAGS += -mlittle-endian -mcpu=cortex-m0  -march=armv6-m -mthumb
-LDFLAGS += -ffunction-sections -fdata-sections
-LDFLAGS += -Wl,--gc-sections -Wl,-Map=$(BUILD_DIR)/$(PROJ_NAME).map
+CFLAGS  = $(addprefix -I,$(INC))
+CFLAGS += -Wall -g -Os
+CFLAGS += -mlittle-endian -mcpu=cortex-m0  -march=armv6-m -mthumb
+CFLAGS += -ffunction-sections -fdata-sections
+LDFLAGS = -Wl,--gc-sections -Wl,-Map=$(BUILD_DIR)/$(PROJ_NAME).map
+LDFLAGS += -L$(STD_PERIPH_LIB) -lstm32f0 -L$(LDSCRIPT_INC) -Tstm32f0.ld
+LDFLAGS += $(LINKER_SPECS)
 
-
-#SOURCES := $(wildcard $(SRC)/*.cpp)
-SOURCES := $(foreach sdir,$(SRC),$(wildcard $(sdir)/*.c*))
-SOURCES += $(foreach sdir,$(SRC),$(wildcard $(sdir)/*.s))
+SOURCES := $(foreach sdir,$(SRC),$(wildcard $(sdir)/*.s))
+SOURCES += $(foreach sdir,$(SRC),$(wildcard $(sdir)/*.cpp))
+SOURCES += $(foreach sdir,$(SRC),$(wildcard $(sdir)/*.c))
 OBJECTS := $(patsubst %, $(BUILD_DIR)/%.o, $(SOURCES))
 
 all: lib $(BUILD_DIR)/$(PROJ_NAME).elf
 
 $(BUILD_DIR)/$(PROJ_NAME).elf: $(OBJECTS)
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(LD) $(OBJECTS) $(CFLAGS) $(LDFLAGS) -o $@
 	$(OBJCOPY) -O ihex $(BUILD_DIR)/$(PROJ_NAME).elf $(BUILD_DIR)/$(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(BUILD_DIR)/$(PROJ_NAME).elf $(BUILD_DIR)/$(PROJ_NAME).bin
 	$(OBJDUMP) -St $(BUILD_DIR)/$(PROJ_NAME).elf >$(BUILD_DIR)/$(PROJ_NAME).lst
@@ -45,7 +48,7 @@ $(BUILD_DIR):
 $(BUILD_DIR)/%.s.o: %.s | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 $(BUILD_DIR)/%.cpp.o: %.cpp | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) -c $< -o $@
 $(BUILD_DIR)/%.c.o: %.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 

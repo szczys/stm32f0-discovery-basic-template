@@ -1,4 +1,5 @@
 #include "stm32f0xx_conf.h"
+#include "test.h"
 
 void SysTick_Handler(void) {
   static uint16_t tick = 0;
@@ -13,6 +14,7 @@ void SysTick_Handler(void) {
 
 int main(void)
 {
+    volatile int u = fff(8, 8);
 
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;  // enable the clock to GPIOC
                         //(RM0091 lists this as IOPCEN, not GPIOCEN)
