@@ -13,7 +13,6 @@ void SysTick_Handler(void) {
 
 int main(void)
 {
-
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;  // enable the clock to GPIOC
                         //(RM0091 lists this as IOPCEN, not GPIOCEN)
 
