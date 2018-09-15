@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f0xx_adc.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file provides firmware functions to manage the following 
   *          functionalities of the Analog to Digital Convertor (ADC) peripheral:
   *           + Initialization and Configuration
@@ -55,7 +55,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -246,8 +246,33 @@ void ADC_Cmd(ADC_TypeDef* ADCx, FunctionalState NewState)
 }
 
 /**
+  * @brief  Configure the ADC to either be clocked by the asynchronous clock(which is
+  *         independent, the dedicated 14MHz clock) or the synchronous clock derived from
+  *         the APB clock of the ADC bus interface divided by 2 or 4
+  * @note   This function can be called only when ADC is disabled.
+  * @param  ADCx: where x can be 1 to select the ADC1 peripheral.
+  * @param  ADC_ClockMode: This parameter can be :
+  *            @arg ADC_ClockMode_AsynClk: ADC clocked by the dedicated 14MHz clock
+  *            @arg ADC_ClockMode_SynClkDiv2: ADC clocked by PCLK/2
+  *            @arg ADC_ClockMode_SynClkDiv4: ADC clocked by PCLK/4  
+  * @retval None
+  */
+void ADC_ClockModeConfig(ADC_TypeDef* ADCx, uint32_t ADC_ClockMode)
+{
+  /* Check the parameters */
+  assert_param(IS_ADC_ALL_PERIPH(ADCx));
+  assert_param(IS_ADC_CLOCKMODE(ADC_ClockMode));
+
+    /* Configure the ADC Clock mode according to ADC_ClockMode */
+    ADCx->CFGR2 = (uint32_t)ADC_ClockMode;
+
+}
+
+/**
   * @brief  Enables or disables the jitter when the ADC is clocked by PCLK div2
   *         or div4
+  * @note   This function is obsolete and maintained for legacy purpose only. ADC_ClockModeConfig()
+  *         function should be used instead.  
   * @param  ADCx: where x can be 1 to select the ADC1 peripheral.
   * @param  ADC_JitterOff: This parameter can be :
   *            @arg ADC_JitterOff_PCLKDiv2: Remove jitter when ADC is clocked by PLCK divided by 2
@@ -453,15 +478,15 @@ void ADC_AnalogWatchdogThresholdsConfig(ADC_TypeDef* ADCx, uint16_t HighThreshol
   *            @arg ADC_AnalogWatchdog_Channel_7: ADC Channel7 selected
   *            @arg ADC_AnalogWatchdog_Channel_8: ADC Channel8 selected
   *            @arg ADC_AnalogWatchdog_Channel_9: ADC Channel9 selected
-  *            @arg ADC_AnalogWatchdog_Channel_10: ADC Channel10 selected
-  *            @arg ADC_AnalogWatchdog_Channel_11: ADC Channel11 selected
-  *            @arg ADC_AnalogWatchdog_Channel_12: ADC Channel12 selected
-  *            @arg ADC_AnalogWatchdog_Channel_13: ADC Channel13 selected
-  *            @arg ADC_AnalogWatchdog_Channel_14: ADC Channel14 selected
-  *            @arg ADC_AnalogWatchdog_Channel_15: ADC Channel15 selected
+  *            @arg ADC_AnalogWatchdog_Channel_10: ADC Channel10 selected, not available for STM32F031 devices
+  *            @arg ADC_AnalogWatchdog_Channel_11: ADC Channel11 selected, not available for STM32F031 devices
+  *            @arg ADC_AnalogWatchdog_Channel_12: ADC Channel12 selected, not available for STM32F031 devices
+  *            @arg ADC_AnalogWatchdog_Channel_13: ADC Channel13 selected, not available for STM32F031 devices
+  *            @arg ADC_AnalogWatchdog_Channel_14: ADC Channel14 selected, not available for STM32F031 devices
+  *            @arg ADC_AnalogWatchdog_Channel_15: ADC Channel15 selected, not available for STM32F031 devices
   *            @arg ADC_AnalogWatchdog_Channel_16: ADC Channel16 selected
   *            @arg ADC_AnalogWatchdog_Channel_17: ADC Channel17 selected
-  *            @arg ADC_AnalogWatchdog_Channel_18: ADC Channel18 selected
+  *            @arg ADC_AnalogWatchdog_Channel_18: ADC Channel18 selected, not available for STM32F030 devices
   * @note   The channel selected on the AWDCH must be also set into the CHSELR 
   *         register 
   * @retval None
@@ -587,7 +612,8 @@ void ADC_VrefintCmd(FunctionalState NewState)
 }
 
 /**
-  * @brief  Enables or disables the Vbat channel.
+  * @brief  Enables or disables the Vbat channel. 
+  * @note   This feature is not applicable for STM32F030 devices. 
   * @param  NewState: new state of the Vbat input channel.
   *          This parameter can be: ENABLE or DISABLE.
   * @retval None
@@ -664,15 +690,15 @@ void ADC_VbatCmd(FunctionalState NewState)
   *            @arg ADC_Channel_7: ADC Channel7 selected
   *            @arg ADC_Channel_8: ADC Channel8 selected
   *            @arg ADC_Channel_9: ADC Channel9 selected
-  *            @arg ADC_Channel_10: ADC Channel10 selected
-  *            @arg ADC_Channel_11: ADC Channel11 selected
-  *            @arg ADC_Channel_12: ADC Channel12 selected
-  *            @arg ADC_Channel_13: ADC Channel13 selected
-  *            @arg ADC_Channel_14: ADC Channel14 selected
-  *            @arg ADC_Channel_15: ADC Channel15 selected
+  *            @arg ADC_Channel_10: ADC Channel10 selected, not available for STM32F031 devices
+  *            @arg ADC_Channel_11: ADC Channel11 selected, not available for STM32F031 devices
+  *            @arg ADC_Channel_12: ADC Channel12 selected, not available for STM32F031 devices
+  *            @arg ADC_Channel_13: ADC Channel13 selected, not available for STM32F031 devices
+  *            @arg ADC_Channel_14: ADC Channel14 selected, not available for STM32F031 devices
+  *            @arg ADC_Channel_15: ADC Channel15 selected, not available for STM32F031 devices
   *            @arg ADC_Channel_16: ADC Channel16 selected
   *            @arg ADC_Channel_17: ADC Channel17 selected
-  *            @arg ADC_Channel_18: ADC Channel18 selected    
+  *            @arg ADC_Channel_18: ADC Channel18 selected, not available for STM32F030 devices
   * @param  ADC_SampleTime: The sample time value to be set for the selected channel. 
   *          This parameter can be one of the following values:
   *            @arg ADC_SampleTime_1_5Cycles: Sample time equal to 1.5 cycles  

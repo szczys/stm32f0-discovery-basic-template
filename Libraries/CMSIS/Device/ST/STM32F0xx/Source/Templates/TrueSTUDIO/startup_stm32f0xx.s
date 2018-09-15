@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file      startup_stm32f0xx.s
   * @author    MCD Application Team
-  * @version   V1.0.1
-  * @date      20-April-2012
+  * @version   V1.5.0
+  * @date      05-December-2014
   * @brief     STM32F0xx Devices vector table for Atollic toolchain.
   *            This module performs:
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
   *                - Set the vector table entries with the exceptions ISR address
-  *                - Configure the clock system
+  *                - Configure the system clock
   *                - Branches to main in the C library (which eventually
   *                  calls main()).
   *            After Reset the Cortex-M0 processor is in Thread mode,
@@ -17,7 +17,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -54,16 +54,6 @@ defined in linker script */
 /* end address for the .bss section. defined in linker script */
 .word _ebss
 
-.equ  BootRAM, 0xF108F85F
-/**
- * @brief  This is the code that gets called when the processor first
- *          starts execution following a reset event. Only the absolutely
- *          necessary set is performed, after which the application
- *          supplied main() routine is called.
- * @param  None
- * @retval : None
-*/
-
   .section .text.Reset_Handler
   .weak Reset_Handler
   .type Reset_Handler, %function
@@ -71,6 +61,27 @@ Reset_Handler:
   ldr   r0, =_estack
   mov   sp, r0          /* set stack pointer */
 
+/*Check if boot space corresponds to test memory*/
+ 
+    LDR R0,=0x00000004
+    LDR R1, [R0]
+    LSRS R1, R1, #24
+    LDR R2,=0x1F
+    CMP R1, R2
+    BNE ApplicationStart
+
+ /*SYSCFG clock enable*/
+
+    LDR R0,=0x40021018
+    LDR R1,=0x00000001
+    STR R1, [R0]
+
+/*Set CFGR1 register with flash memory remap at address 0*/
+    LDR R0,=0x40010000
+    LDR R1,=0x00000000
+    STR R1, [R0]
+
+ApplicationStart:
 /* Copy the data segment initializers from flash to SRAM */
   movs r1, #0
   b LoopCopyDataInit
@@ -188,8 +199,6 @@ g_pfnVectors:
   .word 0
   .word CEC_IRQHandler
   .word 0
-  .word BootRAM          /* @0x108. This is for boot in RAM mode for 
-                            STM32F0xx devices. */
 
 /*******************************************************************************
 *

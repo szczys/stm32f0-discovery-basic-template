@@ -1,4 +1,5 @@
 PROJ_NAME=hello
+DEVICE=STM32F051
 # Location of the Libraries folder from the STM32F0xx Standard Peripheral Library
 STD_PERIPH_LIB=Libraries
 INC := inc
@@ -21,7 +22,7 @@ LINKER_SPECS := --specs=nano.specs --specs=nosys.specs
 LDSCRIPT_INC=Device/ldscripts
 
 CFLAGS = $(addprefix -I,$(INC))
-CFLAGS += -Wall -g -Os
+CFLAGS += -Wall -g -Os -D$(DEVICE)
 CFLAGS += -mlittle-endian -mcpu=cortex-m0  -march=armv6-m -mthumb
 CFLAGS += -ffunction-sections -fdata-sections
 LDFLAGS = -L$(STD_PERIPH_LIB) -lstm32f0 -L$(LDSCRIPT_INC) -TSTM32F051R8Tx_FLASH.ld

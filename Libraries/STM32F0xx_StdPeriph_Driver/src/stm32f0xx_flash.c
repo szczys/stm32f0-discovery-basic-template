@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f0xx_flash.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file provides firmware functions to manage the following 
   *          functionalities of the FLASH peripheral:
   *            - FLASH Interface configuration
@@ -55,7 +55,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-  /* Private macro -------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -440,7 +440,7 @@ FLASH_Status FLASH_ProgramHalfWord(uint32_t Address, uint16_t Data)
        (+) FLASH_Status FLASH_OB_BOOTConfig(uint8_t OB_BOOT1);
        (+) FLASH_Status FLASH_OB_VDDAConfig(uint8_t OB_VDDA_ANALOG);
        (+) FLASH_Status FLASH_OB_WriteUser(uint8_t OB_USER);
-       (+) FLASH_ProgramOptionByteData(uint32_t Address, uint8_t Data);
+       (+) FLASH_OB_ProgramData(uint32_t Address, uint8_t Data);
        (+) uint8_t FLASH_OB_GetUser(void);
        (+) uint32_t FLASH_OB_GetWRP(void);
        (+) FlagStatus FLASH_OB_GetRDP(void);
@@ -461,7 +461,7 @@ FLASH_Status FLASH_ProgramHalfWord(uint32_t Address, uint16_t Data)
            => to enable or disable the VDDA Analog Monitoring 			 
       (++) You can write all User Options bytes at once using a single function
            by calling FLASH_Status FLASH_OB_WriteUser(uint8_t OB_USER)
-      (++) FLASH_ProgramOptionByteData(uint32_t Address, uint8_t Data) to program the 
+      (++) FLASH_OB_ProgramData(uint32_t Address, uint8_t Data) to program the 
            two half word in the option bytes
 
    (#) Once all needed option bytes to be programmed are correctly written, call the
@@ -592,7 +592,7 @@ FLASH_Status FLASH_OB_Erase(void)
   */
 FLASH_Status FLASH_OB_EnableWRP(uint32_t OB_WRP)
 {
-  uint16_t WRP0_Data = 0xFFFF, WRP1_Data = 0xFFFF;
+ uint16_t WRP0_Data = 0xFFFF, WRP1_Data = 0xFFFF, WRP2_Data = 0xFFFF, WRP3_Data = 0xFFFF;
 
   FLASH_Status status = FLASH_COMPLETE;
 
@@ -601,8 +601,10 @@ FLASH_Status FLASH_OB_EnableWRP(uint32_t OB_WRP)
 
   OB_WRP = (uint32_t)(~OB_WRP);
   WRP0_Data = (uint16_t)(OB_WRP & OB_WRP0_WRP0);
-  WRP1_Data = (uint16_t)((OB_WRP & OB_WRP0_nWRP0) >> 8);
-
+  WRP1_Data = (uint16_t)((OB_WRP >> 8) & OB_WRP0_WRP0);
+  WRP2_Data = (uint16_t)((OB_WRP >> 16) & OB_WRP0_WRP0) ;
+  WRP3_Data = (uint16_t)((OB_WRP >> 24) & OB_WRP0_WRP0) ;
+    
   /* Wait for last operation to be completed */
   status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
 
@@ -624,7 +626,20 @@ FLASH_Status FLASH_OB_EnableWRP(uint32_t OB_WRP)
       /* Wait for last operation to be completed */
       status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
     }
-          
+    if((status == FLASH_COMPLETE) && (WRP2_Data != 0xFF))
+    {
+      OB->WRP2 = WRP2_Data;
+      
+      /* Wait for last operation to be completed */
+      status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
+    }    
+    if((status == FLASH_COMPLETE) && (WRP3_Data != 0xFF))
+    {
+      OB->WRP3 = WRP3_Data;
+      
+      /* Wait for last operation to be completed */
+      status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
+    }  
     if(status != FLASH_TIMEOUT)
     {
       /* if the program operation is completed, disable the OPTPG Bit */
@@ -788,6 +803,84 @@ FLASH_Status FLASH_OB_BOOTConfig(uint8_t OB_BOOT1)
 }
 
 /**
+  * @brief  Sets or resets the BOOT0 option bit.
+  * @note   This function is applicable only for the STM32F042 devices.
+  * @param  OB_BOOT0: Set or Reset the BOOT0 option bit.
+  *          This parameter can be one of the following values:
+  *             @arg OB_BOOT0_RESET: BOOT0 option bit reset
+  *             @arg OB_BOOT0_SET: BOOT0 option bit set
+  * @retval None
+  */
+FLASH_Status FLASH_OB_BOOT0Config(uint8_t OB_BOOT0)
+{
+  FLASH_Status status = FLASH_COMPLETE; 
+
+  /* Check the parameters */
+  assert_param(IS_OB_BOOT0(OB_BOOT0));
+
+  /* Wait for last operation to be completed */
+  status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
+  
+  if(status == FLASH_COMPLETE)
+  {  
+    /* Enable the Option Bytes Programming operation */
+    FLASH->CR |= FLASH_CR_OPTPG;
+
+    OB->USER = OB_BOOT0 | 0xF7;
+  
+    /* Wait for last operation to be completed */
+    status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
+
+    if(status != FLASH_TIMEOUT)
+    {
+      /* If the program operation is completed, disable the OPTPG Bit */
+      FLASH->CR &= ~FLASH_CR_OPTPG;
+    }
+  }
+  /* Return the Option Byte program Status */
+  return status;
+}
+
+/**
+  * @brief  Sets or resets the BOOT0SW option bit.
+  * @note   This function is applicable only for the STM32F042 devices.   
+  * @param  OB_BOOT0SW: Set or Reset the BOOT0_SW option bit.
+  *          This parameter can be one of the following values:
+  *             @arg OB_BOOT0_SW: BOOT0_SW option bit reset
+  *             @arg OB_BOOT0_HW: BOOT0_SW option bit set
+  * @retval None
+  */
+FLASH_Status FLASH_OB_BOOT0SWConfig(uint8_t OB_BOOT0SW)
+{
+  FLASH_Status status = FLASH_COMPLETE; 
+
+  /* Check the parameters */
+  assert_param(IS_OB_BOOT0SW(OB_BOOT0SW));
+
+  /* Wait for last operation to be completed */
+  status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
+  
+  if(status == FLASH_COMPLETE)
+  {  
+    /* Enable the Option Bytes Programming operation */
+    FLASH->CR |= FLASH_CR_OPTPG;
+
+    OB->USER = OB_BOOT0SW | 0x7F;
+  
+    /* Wait for last operation to be completed */
+    status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
+
+    if(status != FLASH_TIMEOUT)
+    {
+      /* If the program operation is completed, disable the OPTPG Bit */
+      FLASH->CR &= ~FLASH_CR_OPTPG;
+    }
+  }
+  /* Return the Option Byte program Status */
+  return status;
+}
+
+/**
   * @brief  Sets or resets the analogue monitoring on VDDA Power source.
   * @param  OB_VDDA_ANALOG: Selects the analog monitoring on VDDA Power source.
   *          This parameter can be one of the following values:
@@ -876,7 +969,9 @@ FLASH_Status FLASH_OB_SRAMParityConfig(uint8_t OB_SRAM_Parity)
   *             @arg OB_STDBY_NoRST / OB_STDBY_RST: No reset / Reset generated when entering in STANDBY
   *             @arg OB_BOOT1_RESET / OB_BOOT1_SET: BOOT1 Reset / Set
   *             @arg OB_VDDA_ANALOG_ON / OB_VDDA_ANALOG_OFF: Analog monitoring on VDDA Power source ON / OFF 
-  *             @arg OB_SRAM_PARITY_SET / OB_SRAM_PARITY_RESET: SRAM Parity SET / RESET   
+  *             @arg OB_SRAM_PARITY_SET / OB_SRAM_PARITY_RESET: SRAM Parity SET / RESET
+  *             @arg OB_BOOT0_RESET / OB_BOOT0_SET: BOOT0 Reset / Set
+  *             @arg OB_BOOT0_SW / OB_BOOT0_SW: BOOT0 pin disabled / BOOT0 pin bonded with GPIO      
   * @retval FLASH Status: The returned value can be: 
   *         FLASH_ERROR_PROGRAM, FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
   */
@@ -892,7 +987,7 @@ FLASH_Status FLASH_OB_WriteUser(uint8_t OB_USER)
     /* Enable the Option Bytes Programming operation */
     FLASH->CR |= FLASH_CR_OPTPG; 
 
-    OB->USER = OB_USER | 0x88;
+    OB->USER = OB_USER;
   
     /* Wait for last operation to be completed */
     status = FLASH_WaitForLastOperation(FLASH_ER_PRG_TIMEOUT);
@@ -919,7 +1014,7 @@ FLASH_Status FLASH_OB_WriteUser(uint8_t OB_USER)
   * @retval FLASH Status: The returned value can be: FLASH_ERROR_PG,
   *         FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
   */
-FLASH_Status FLASH_ProgramOptionByteData(uint32_t Address, uint8_t Data)
+FLASH_Status FLASH_OB_ProgramData(uint32_t Address, uint8_t Data)
 {
   FLASH_Status status = FLASH_COMPLETE;
   /* Check the parameters */

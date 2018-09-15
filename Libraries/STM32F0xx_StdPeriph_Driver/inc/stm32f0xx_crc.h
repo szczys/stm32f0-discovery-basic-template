@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f0xx_crc.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file contains all the functions prototypes for the CRC firmware 
   *          library.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
-/** @defgroup CRC_Exported_Constants
+/** @defgroup CRC_ReverseInputData
   * @{
   */
 #define CRC_ReverseInputData_No             ((uint32_t)0x00000000) /*!< No reverse operation of Input Data */
@@ -65,17 +65,39 @@
   * @}
   */
 
+/** @defgroup CRC_PolynomialSize
+  * @brief    Only applicable for STM32F042 and STM32F072 devices 
+  * @{
+  */
+#define CRC_PolSize_7                       CRC_CR_POLSIZE        /*!< 7-bit polynomial for CRC calculation */
+#define CRC_PolSize_8                       CRC_CR_POLSIZE_1      /*!< 8-bit polynomial for CRC calculation */
+#define CRC_PolSize_16                      CRC_CR_POLSIZE_0      /*!< 16-bit polynomial for CRC calculation */
+#define CRC_PolSize_32                      ((uint32_t)0x00000000)/*!< 32-bit polynomial for CRC calculation */
+
+#define IS_CRC_POL_SIZE(SIZE) (((SIZE) == CRC_PolSize_7)  || \
+                               ((SIZE) == CRC_PolSize_8)  || \
+                               ((SIZE) == CRC_PolSize_16) || \
+                               ((SIZE) == CRC_PolSize_32))
+
+/**
+  * @}
+  */
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 /* Configuration of the CRC computation unit **********************************/
 void CRC_DeInit(void);
 void CRC_ResetDR(void);
+void CRC_PolynomialSizeSelect(uint32_t CRC_PolSize); /*!< Only applicable for STM32F042 and STM32F072 devices */ 
 void CRC_ReverseInputDataSelect(uint32_t CRC_ReverseInputData);
 void CRC_ReverseOutputDataCmd(FunctionalState NewState);
-void CRC_SetInitRegister(uint32_t CRC_InitValue);
+void CRC_SetInitRegister(uint32_t CRC_InitValue); 
+void CRC_SetPolynomial(uint32_t CRC_Pol); /*!< Only applicable for STM32F042 and STM32F072 devices */
 
 /* CRC computation ************************************************************/
 uint32_t CRC_CalcCRC(uint32_t CRC_Data);
+uint32_t CRC_CalcCRC16bits(uint16_t CRC_Data); /*!< Only applicable for STM32F042 and STM32F072 devices */
+uint32_t CRC_CalcCRC8bits(uint8_t CRC_Data); /*!< Only applicable for STM32F042 and STM32F072 devices */
 uint32_t CRC_CalcBlockCRC(uint32_t pBuffer[], uint32_t BufferLength);
 uint32_t CRC_GetCRC(void);
 

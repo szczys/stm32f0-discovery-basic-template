@@ -2,13 +2,14 @@
   ******************************************************************************
   * @file      startup_stm32f0xx.s
   * @author    MCD Application Team
-  * @version   V1.0.1
-  * @date      20-April-2012
+  * @version   V1.5.0
+  * @date      05-December-2014
   * @brief     STM32F0xx Devices vector table for RIDE7 toolchain.
   *            This module performs:
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
   *                - Set the vector table entries with the exceptions ISR address
+  *                - Configure the system clock 
   *                - Branches to main in the C library (which eventually
   *                  calls main()).
   *            After Reset the Cortex-M0 processor is in Thread mode,
@@ -16,7 +17,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -32,7 +33,7 @@
   *
   ******************************************************************************
   */
-    
+
   .syntax unified
   .cpu cortex-m0
   .fpu softvfp
@@ -41,10 +42,10 @@
 .global g_pfnVectors
 .global Default_Handler
 
-/* start address for the initialization values of the .data section. 
+/* start address for the initialization values of the .data section.
 defined in linker script */
 .word _sidata
-/* start address for the .data section. defined in linker script */  
+/* start address for the .data section. defined in linker script */
 .word _sdata
 /* end address for the .data section. defined in linker script */
 .word _edata
@@ -58,17 +59,40 @@ defined in linker script */
  * @brief  This is the code that gets called when the processor first
  *          starts execution following a reset event. Only the absolutely
  *          necessary set is performed, after which the application
- *          supplied main() routine is called. 
+ *          supplied main() routine is called.
  * @param  None
  * @retval : None
 */
 
-    .section .text.Reset_Handler
+  .section .text.Reset_Handler
   .weak Reset_Handler
   .type Reset_Handler, %function
 Reset_Handler:
+  ldr   r0, =_estack
+  mov   sp, r0          /* set stack pointer */
 
-/* Copy the data segment initializers from flash to SRAM */  
+/*Check if boot space corresponds to test memory*/
+ 
+    LDR R0,=0x00000004
+    LDR R1, [R0]
+    LSRS R1, R1, #24
+    LDR R2,=0x1F
+    CMP R1, R2
+    BNE ApplicationStart
+
+ /*SYSCFG clock enable*/
+
+    LDR R0,=0x40021018
+    LDR R1,=0x00000001
+    STR R1, [R0]
+
+/*Set CFGR1 register with flash memory remap at address 0*/
+    LDR R0,=0x40010000
+    LDR R1,=0x00000000
+    STR R1, [R0]
+
+ApplicationStart:
+/* Copy the data segment initializers from flash to SRAM */
   movs r1, #0
   b LoopCopyDataInit
 
@@ -77,7 +101,7 @@ CopyDataInit:
   ldr r3, [r3, r1]
   str r3, [r0, r1]
   adds r1, r1, #4
-    
+
 LoopCopyDataInit:
   ldr r0, =_sdata
   ldr r3, =_edata
@@ -86,42 +110,51 @@ LoopCopyDataInit:
   bcc CopyDataInit
   ldr r2, =_sbss
   b LoopFillZerobss
-/* Zero fill the bss segment. */  
+/* Zero fill the bss segment. */
 FillZerobss:
   movs r3, #0
-  str r3, [r2], #4
-    
+  str  r3, [r2]
+  adds r2, r2, #4
+
+
 LoopFillZerobss:
   ldr r3, = _ebss
   cmp r2, r3
   bcc FillZerobss
+
 /* Call the clock system intitialization function.*/
-  bl  SystemInit
+    bl  SystemInit
+    
 /* Call the application's entry point.*/
   bl main
-  bx lr
+  
+LoopForever:
+    b LoopForever
+
+
 .size Reset_Handler, .-Reset_Handler
 
 /**
- * @brief  This is the code that gets called when the processor receives an 
+ * @brief  This is the code that gets called when the processor receives an
  *         unexpected interrupt.  This simply enters an infinite loop, preserving
  *         the system state for examination by a debugger.
  *
  * @param  None
- * @retval None
+ * @retval : None
 */
     .section .text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
   b Infinite_Loop
   .size Default_Handler, .-Default_Handler
-/*******************************************************************************
+/******************************************************************************
 *
-* The minimal vector table for a Cortex M0. Note that the proper constructs
+* The minimal vector table for a Cortex M0.  Note that the proper constructs
 * must be placed on this to ensure that it ends up at physical address
 * 0x0000.0000.
-*******************************************************************************/
-  .section .isr_vector,"a",%progbits
+*
+******************************************************************************/
+   .section .isr_vector,"a",%progbits
   .type g_pfnVectors, %object
   .size g_pfnVectors, .-g_pfnVectors
 
@@ -161,7 +194,7 @@ g_pfnVectors:
   .word TIM2_IRQHandler
   .word TIM3_IRQHandler
   .word TIM6_DAC_IRQHandler
-  .word 0
+  .word 0  
   .word TIM14_IRQHandler
   .word TIM15_IRQHandler
   .word TIM16_IRQHandler
@@ -177,15 +210,15 @@ g_pfnVectors:
   .word 0
   .word BootRAM          /* @0x108. This is for boot in RAM mode for 
                             STM32F0xx devices. */
-   
+
 /*******************************************************************************
 *
-* Provide weak aliases for each Exception handler to the Default_Handler. 
-* As they are weak aliases, any function with the same name will override 
+* Provide weak aliases for each Exception handler to the Default_Handler.
+* As they are weak aliases, any function with the same name will override
 * this definition.
 *
 *******************************************************************************/
-    
+
   .weak NMI_Handler
   .thumb_set NMI_Handler,Default_Handler
 
@@ -286,7 +319,7 @@ g_pfnVectors:
   .thumb_set USART2_IRQHandler,Default_Handler
   
   .weak CEC_IRQHandler
-  .thumb_set CEC_IRQHandler,Default_Handler   
+  .thumb_set CEC_IRQHandler,Default_Handler
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
