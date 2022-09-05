@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f0xx_crc.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file provides firmware functions to manage the following 
   *          functionalities of CRC computation unit peripheral:
   *            + Configuration of the CRC computation unit
@@ -34,7 +34,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -95,10 +95,16 @@ void CRC_DeInit(void)
 {
   /* Set DR register to reset value */
   CRC->DR = 0xFFFFFFFF;
+  
+  /* Set the POL register to the reset value: 0x04C11DB7 */
+  CRC->POL = 0x04C11DB7;
+  
   /* Reset IDR register */
   CRC->IDR = 0x00;
+  
   /* Set INIT register to reset value */
   CRC->INIT = 0xFFFFFFFF;
+  
   /* Reset the CRC calculation unit */
   CRC->CR = CRC_CR_RESET;
 }
@@ -111,7 +117,37 @@ void CRC_DeInit(void)
 void CRC_ResetDR(void)
 {
   /* Reset CRC generator */
-  CRC->CR = CRC_CR_RESET;
+  CRC->CR |= CRC_CR_RESET;
+}
+
+/**
+  * @brief  Selects the polynomial size. This function is only applicable for 
+  *         STM32F072 devices.
+  * @param  CRC_PolSize: Specifies the polynomial size.
+  *         This parameter can be:
+  *          @arg CRC_PolSize_7: 7-bit polynomial for CRC calculation
+  *          @arg CRC_PolSize_8: 8-bit polynomial for CRC calculation
+  *          @arg CRC_PolSize_16: 16-bit polynomial for CRC calculation
+  *          @arg CRC_PolSize_32: 32-bit polynomial for CRC calculation
+  * @retval None
+  */
+void CRC_PolynomialSizeSelect(uint32_t CRC_PolSize)
+{
+  uint32_t tmpcr = 0;
+
+  /* Check the parameter */
+  assert_param(IS_CRC_POL_SIZE(CRC_PolSize));
+
+  /* Get CR register value */
+  tmpcr = CRC->CR;
+
+  /* Reset POL_SIZE bits */
+  tmpcr &= (uint32_t)~((uint32_t)CRC_CR_POLSIZE);
+  /* Set the polynomial size */
+  tmpcr |= (uint32_t)CRC_PolSize;
+
+  /* Write to CR register */
+  CRC->CR = (uint32_t)tmpcr;
 }
 
 /**
@@ -179,6 +215,17 @@ void CRC_SetInitRegister(uint32_t CRC_InitValue)
 }
 
 /**
+  * @brief  Initializes the polynomail coefficients. This function is only 
+  *         applicable for STM32F072 devices.
+  * @param  CRC_Pol: Polynomial to be used for CRC calculation.
+  * @retval None
+  */
+void CRC_SetPolynomial(uint32_t CRC_Pol)
+{
+  CRC->POL = CRC_Pol;
+}
+
+/**
   * @}
   */
 
@@ -203,6 +250,32 @@ uint32_t CRC_CalcCRC(uint32_t CRC_Data)
 {
   CRC->DR = CRC_Data;
   
+  return (CRC->DR);
+}
+
+/**
+  * @brief  Computes the 16-bit CRC of a given 16-bit data. This function is only 
+  *         applicable for STM32F072 devices.
+  * @param  CRC_Data: data half-word(16-bit) to compute its CRC
+  * @retval 16-bit CRC
+  */
+uint32_t CRC_CalcCRC16bits(uint16_t CRC_Data)
+{
+  *(uint16_t*)(CRC_BASE) = (uint16_t) CRC_Data;
+  
+  return (CRC->DR);
+}
+
+/**
+  * @brief  Computes the 8-bit CRC of a given 8-bit data. This function is only 
+  *         applicable for STM32F072 devices.
+  * @param  CRC_Data: 8-bit data to compute its CRC
+  * @retval 8-bit CRC
+  */
+uint32_t CRC_CalcCRC8bits(uint8_t CRC_Data)
+{
+  *(uint8_t*)(CRC_BASE) = (uint8_t) CRC_Data;
+
   return (CRC->DR);
 }
 

@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f0xx_tim.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file contains all the functions prototypes for the TIM 
   *          firmware library. 
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -182,6 +182,7 @@ typedef struct
                                    ((PERIPH) == TIM2) || \
                                    ((PERIPH) == TIM3) || \
                                    ((PERIPH) == TIM6) || \
+                                   ((PERIPH) == TIM7) || \
                                    ((PERIPH) == TIM14)|| \
                                    ((PERIPH) == TIM15)|| \
                                    ((PERIPH) == TIM16)|| \
@@ -210,7 +211,7 @@ typedef struct
                                      ((PERIPH) == TIM16)|| \
                                      ((PERIPH) == TIM17))
 
-/* LIST4: TIM 1, 2, 3, 15, 16 and 17 */
+/* LIST5: TIM 1, 2, 3, 15, 16 and 17 */
 #define IS_TIM_LIST5_PERIPH(PERIPH) (((PERIPH) == TIM1) || \
                                      ((PERIPH) == TIM2) || \
                                      ((PERIPH) == TIM3) || \
@@ -218,17 +219,18 @@ typedef struct
                                      ((PERIPH) == TIM16)|| \
                                      ((PERIPH) == TIM17))
 
-/* LIST5: TIM 1, 2, 3 and 15 */
+/* LIST6: TIM 1, 2, 3 and 15 */
 #define IS_TIM_LIST6_PERIPH(PERIPH) (((PERIPH) == TIM1) || \
                                      ((PERIPH) == TIM2) || \
                                      ((PERIPH) == TIM3) || \
                                      ((PERIPH) == TIM15)) 
 
-/* LIST7: TIM 1, 2, 3, 6 and 14 */
+/* LIST7: TIM 1, 2, 3, 6, 7 and 14 */
 #define IS_TIM_LIST7_PERIPH(PERIPH)  (((PERIPH) == TIM1) || \
                                       ((PERIPH) == TIM2) || \
                                       ((PERIPH) == TIM3) || \
                                       ((PERIPH) == TIM6) || \
+                                      ((PERIPH) == TIM7) || \
                                       ((PERIPH) == TIM14))
                                       
 /* LIST8: TIM 1, 2, 3 and 14 */
@@ -237,18 +239,20 @@ typedef struct
                                       ((PERIPH) == TIM3) || \
                                       ((PERIPH) == TIM14))
 
-/* LIST9: TIM 1, 2, 3, 6 and 15 */
+/* LIST9: TIM 1, 2, 3, 6, 7 and 15 */
 #define IS_TIM_LIST9_PERIPH(PERIPH)  (((PERIPH) == TIM1) || \
                                       ((PERIPH) == TIM2) || \
                                       ((PERIPH) == TIM3) || \
                                       ((PERIPH) == TIM6) || \
+                                      ((PERIPH) == TIM7) || \
                                       ((PERIPH) == TIM15))
 
-/* LIST10: TIM 1, 2, 3, 6, 15, 16 and 17 */
+/* LIST10: TIM 1, 2, 3, 6, 7, 15, 16 and 17 */
 #define IS_TIM_LIST10_PERIPH(PERIPH) (((PERIPH) == TIM1) || \
                                      ((PERIPH) == TIM2) || \
                                      ((PERIPH) == TIM3) || \
                                      ((PERIPH) == TIM6) || \
+                                     ((PERIPH) == TIM7) || \
                                      ((PERIPH) == TIM15)|| \
                                      ((PERIPH) == TIM16)|| \
                                      ((PERIPH) == TIM17))

@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f0xx_i2c.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file provides firmware functions to manage the following 
   *          functionalities of the Inter-Integrated circuit (I2C):
   *           + Initialization and Configuration
@@ -58,7 +58,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -296,25 +296,22 @@ void I2C_Cmd(I2C_TypeDef* I2Cx, FunctionalState NewState)
 /**
   * @brief  Enables or disables the specified I2C software reset.
   * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
-  * @param  NewState: new state of the I2C software reset.
-  *          This parameter can be: ENABLE or DISABLE.
   * @retval None
   */
-void I2C_SoftwareResetCmd(I2C_TypeDef* I2Cx, FunctionalState NewState)
+void I2C_SoftwareResetCmd(I2C_TypeDef* I2Cx)
 {
   /* Check the parameters */
   assert_param(IS_I2C_ALL_PERIPH(I2Cx));
-  assert_param(IS_FUNCTIONAL_STATE(NewState));
-  if (NewState != DISABLE)
-  {
-    /* Peripheral under reset */
-    I2Cx->CR1 |= I2C_CR1_SWRST;
-  }
-  else
-  {
-    /* Peripheral not under reset */
-    I2Cx->CR1 &= (uint32_t)~((uint32_t)I2C_CR1_SWRST);
-  }
+
+  /* Disable peripheral */
+  I2Cx->CR1 &= (uint32_t)~((uint32_t)I2C_CR1_PE);
+
+  /* Perform a dummy read to delay the disable of peripheral for minimum
+     3 APB clock cycles to perform the software reset functionality */
+  *(__IO uint32_t *)(uint32_t)I2Cx; 
+
+  /* Enable peripheral */
+  I2Cx->CR1 |= I2C_CR1_PE;
 }
 
 /**
@@ -379,6 +376,7 @@ void I2C_StretchClockCmd(I2C_TypeDef* I2Cx, FunctionalState NewState)
 
 /**
   * @brief  Enables or disables I2C wakeup from stop mode.
+  *         This function is not applicable for  STM32F030 devices.  
   * @param  I2Cx: where x can be 1 to select the I2C peripheral.
   * @param  NewState: new state of the I2Cx stop mode.
   *          This parameter can be: ENABLE or DISABLE.
@@ -1140,12 +1138,12 @@ void I2C_PECRequestCmd(I2C_TypeDef* I2Cx, FunctionalState NewState)
   if (NewState != DISABLE)
   {
     /* Enable PEC transmission/reception request */
-    I2Cx->CR1 |= I2C_CR2_PECBYTE;   
+    I2Cx->CR2 |= I2C_CR2_PECBYTE;   
   }
   else
   {
     /* Disable PEC transmission/reception request */    
-    I2Cx->CR1 &= (uint32_t)~((uint32_t)I2C_CR2_PECBYTE); 
+    I2Cx->CR2 &= (uint32_t)~((uint32_t)I2C_CR2_PECBYTE); 
   }
 }
 
@@ -1506,12 +1504,12 @@ ITStatus I2C_GetITStatus(I2C_TypeDef* I2Cx, uint32_t I2C_IT)
 
   /* Check if the interrupt source is enabled or not */
   /* If Error interrupt */
-  if((I2C_IT & ERROR_IT_MASK) != 0)
+  if ((uint32_t)(I2C_IT & ERROR_IT_MASK))
   {
     enablestatus = (uint32_t)((I2C_CR1_ERRIE) & (I2Cx->CR1));
   }
   /* If TC interrupt */
-  else if((I2C_IT & TC_IT_MASK) != 0)
+  else if ((uint32_t)(I2C_IT & TC_IT_MASK))
   {
     enablestatus = (uint32_t)((I2C_CR1_TCIE) & (I2Cx->CR1));
   }

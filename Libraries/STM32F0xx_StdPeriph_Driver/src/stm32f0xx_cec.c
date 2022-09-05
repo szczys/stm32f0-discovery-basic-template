@@ -2,10 +2,11 @@
   ******************************************************************************
   * @file    stm32f0xx_cec.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file provides firmware functions to manage the following 
-  *          functionalities of the Consumer Electronics Control (CEC) peripheral:
+  *          functionalities of the Consumer Electronics Control (CEC) peripheral
+  *          applicable only on STM32F051, STM32F042 and STM32F072 devices:
   *            + Initialization and Configuration
   *            + Data transfers functions
   *            + Interrupts and flags management
@@ -71,7 +72,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.

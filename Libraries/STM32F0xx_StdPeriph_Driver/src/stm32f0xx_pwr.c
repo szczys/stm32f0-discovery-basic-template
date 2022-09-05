@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f0xx_pwr.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file provides firmware functions to manage the following 
   *          functionalities of the Power Controller (PWR) peripheral:
   *           + Backup Domain Access
@@ -15,7 +15,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -140,6 +140,7 @@ void PWR_BackupAccessCmd(FunctionalState NewState)
 
 /**
   * @brief  Configures the voltage threshold detected by the Power Voltage Detector(PVD).
+  * @note   This function is not applicable for STM32F030 devices. 
   * @param  PWR_PVDLevel: specifies the PVD detection level
   *          This parameter can be one of the following values:
   *             @arg PWR_PVDLevel_0
@@ -176,6 +177,7 @@ void PWR_PVDLevelConfig(uint32_t PWR_PVDLevel)
 
 /**
   * @brief  Enables or disables the Power Voltage Detector(PVD).
+  * @note   This function is not applicable for STM32F030 devices.    
   * @param  NewState: new state of the PVD.
   *          This parameter can be: ENABLE or DISABLE.
   * @retval None
@@ -211,7 +213,10 @@ void PWR_PVDCmd(FunctionalState NewState)
 
   (+) WakeUp pins are used to wakeup the system from Standby mode. These pins are 
       forced in input pull down configuration and are active on rising edges.
-  (+) There are three WakeUp pins: WakeUp Pin 1 on PA.00 and WakeUp Pin 2 on PC.13.
+  (+) There are eight WakeUp pins: WakeUp Pin 1 on PA.00 and WakeUp Pin 2 on PC.13. 
+      The following WakeUp pins are only applicable for STM32F072 dvices:
+      WakeUp Pin 3 on PE.06, WakeUp Pin 4 on PA.02, WakeUp Pin 5 on PC.05, 
+      WakeUp Pin 6 on PB.05, WakeUp Pin 7 on PB.15 and WakeUp Pin 8 on PF.02.
 
 @endverbatim
   * @{
@@ -220,7 +225,15 @@ void PWR_PVDCmd(FunctionalState NewState)
 /**
   * @brief  Enables or disables the WakeUp Pin functionality.
   * @param  PWR_WakeUpPin: specifies the WakeUpPin.
-  *          This parameter can be: PWR_WakeUpPin_1 or PWR_WakeUpPin_2.
+  *          This parameter can be one of the following values
+  *             @arg PWR_WakeUpPin_1
+  *             @arg PWR_WakeUpPin_2
+  *             @arg PWR_WakeUpPin_3, only applicable for STM32F072 devices
+  *             @arg PWR_WakeUpPin_4, only applicable for STM32F072 devices
+  *             @arg PWR_WakeUpPin_5, only applicable for STM32F072 devices
+  *             @arg PWR_WakeUpPin_6, only applicable for STM32F072 devices
+  *             @arg PWR_WakeUpPin_7, only applicable for STM32F072 devices
+  *             @arg PWR_WakeUpPin_8, only applicable for STM32F072 devices            
   * @param  NewState: new state of the WakeUp Pin functionality.
   *          This parameter can be: ENABLE or DISABLE.
   * @retval None
@@ -375,6 +388,8 @@ void PWR_EnterSleepMode(uint8_t PWR_SLEEPEntry)
   else
   {
     /* Request Wait For Event */
+    __SEV();
+    __WFE(); 
     __WFE();
   }
 }
@@ -389,50 +404,58 @@ void PWR_EnterSleepMode(uint8_t PWR_SLEEPEntry)
   *         By keeping the internal regulator ON during Stop mode, the consumption 
   *         is higher although the startup time is reduced.
   * @param  PWR_Regulator: specifies the regulator state in STOP mode.
-  *          This parameter can be one of the following values:
+  *         This parameter can be one of the following values:
   *             @arg PWR_Regulator_ON: STOP mode with regulator ON
   *             @arg PWR_Regulator_LowPower: STOP mode with regulator in low power mode
   * @param  PWR_STOPEntry: specifies if STOP mode in entered with WFI or WFE instruction.
-  *          This parameter can be one of the following values:
+  *         This parameter can be one of the following values:
   *             @arg PWR_STOPEntry_WFI: enter STOP mode with WFI instruction
   *             @arg PWR_STOPEntry_WFE: enter STOP mode with WFE instruction
+                @arg PWR_STOPEntry_SLEEPONEXIT: enter STOP mode with SLEEPONEXIT instruction
   * @retval None
   */
 void PWR_EnterSTOPMode(uint32_t PWR_Regulator, uint8_t PWR_STOPEntry)
 {
   uint32_t tmpreg = 0;
-
+  
   /* Check the parameters */
   assert_param(IS_PWR_REGULATOR(PWR_Regulator));
   assert_param(IS_PWR_STOP_ENTRY(PWR_STOPEntry));
-
+  
   /* Select the regulator state in STOP mode ---------------------------------*/
   tmpreg = PWR->CR;
   /* Clear PDDS and LPDSR bits */
   tmpreg &= CR_DS_MASK;
-
+  
   /* Set LPDSR bit according to PWR_Regulator value */
   tmpreg |= PWR_Regulator;
-
+  
   /* Store the new value */
   PWR->CR = tmpreg;
-
+  
   /* Set SLEEPDEEP bit of Cortex-M0 System Control Register */
   SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-
+  
   /* Select STOP mode entry --------------------------------------------------*/
   if(PWR_STOPEntry == PWR_STOPEntry_WFI)
   {
     /* Request Wait For Interrupt */
     __WFI();
+    /* Reset SLEEPDEEP bit of Cortex System Control Register */
+    SCB->SCR &= (uint32_t)~((uint32_t)SCB_SCR_SLEEPDEEP_Msk); 
   }
-  else
+  else if (PWR_STOPEntry == PWR_STOPEntry_WFE)
   {
     /* Request Wait For Event */
     __WFE();
+    /* Reset SLEEPDEEP bit of Cortex System Control Register */
+    SCB->SCR &= (uint32_t)~((uint32_t)SCB_SCR_SLEEPDEEP_Msk);   
   }
-  /* Reset SLEEPDEEP bit of Cortex System Control Register */
-  SCB->SCR &= (uint32_t)~((uint32_t)SCB_SCR_SLEEPDEEP_Msk);  
+  else
+  {
+    /* Set SLEEP on exit bit of Cortex-M0 System Control Register */
+    SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
+  }
 }
 
 /**
@@ -442,14 +465,12 @@ void PWR_EnterSTOPMode(uint32_t PWR_Regulator, uint8_t PWR_STOPEntry)
   *          - RTC_AF1 pin (PC13) if configured for Wakeup pin 2 (WKUP2), tamper, 
   *             time-stamp, RTC Alarm out, or RTC clock calibration out.
   *          - WKUP pin 1 (PA0) if enabled.
+  * @note The Wakeup flag (WUF) need to be cleared at application level before to call this function     
   * @param  None
   * @retval None
   */
 void PWR_EnterSTANDBYMode(void)
 {
-  /* Clear Wakeup flag */
-  PWR->CR |= PWR_CR_CWUF;
-
   /* Select STANDBY mode */
   PWR->CR |= PWR_CR_PDDS;
 

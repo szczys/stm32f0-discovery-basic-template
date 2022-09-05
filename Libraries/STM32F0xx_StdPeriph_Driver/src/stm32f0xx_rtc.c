@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f0xx_rtc.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    20-April-2012
+  * @version V1.5.0
+  * @date    05-December-2014
   * @brief   This file provides firmware functions to manage the following 
   *          functionalities of the Real-Time Clock (RTC) peripheral:
   *           + Initialization
@@ -94,6 +94,17 @@
         (+) Enable the selected RTC Alarm using the RTC_AlarmCmd() function  
         (+) To read the RTC Alarm, use the RTC_GetAlarm() function.
         (+) To read the RTC alarm SubSecond, use the RTC_GetAlarmSubSecond() function.
+
+ ***RTC Wakeup configuration***
+ ========================== 
+    [..]  
+        (+) Configure the RTC Wakeup Clock source use the RTC_WakeUpClockConfig()
+            function.
+        (+) Configure the RTC WakeUp Counter using the RTC_SetWakeUpCounter() 
+            function  
+        (+) Enable the RTC WakeUp using the RTC_WakeUpCmd() function  
+        (+) To read the RTC WakeUp Counter register, use the RTC_GetWakeUpCounter() 
+            function.
   
  ***Outputs configuration ***
  ============================
@@ -202,7 +213,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT 2012 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
   *
   * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
   * You may not use this file except in compliance with the License.
@@ -308,7 +319,6 @@ static uint8_t RTC_Bcd2ToByte(uint8_t Value);
   */
 ErrorStatus RTC_DeInit(void)
 {
-  __IO uint32_t wutcounter = 0x00;
   ErrorStatus status = ERROR;
   
   /* Disable the write protection for RTC registers */
@@ -324,12 +334,13 @@ ErrorStatus RTC_DeInit(void)
   {
     /* Reset TR, DR and CR registers */
     RTC->TR        = (uint32_t)0x00000000;
+    RTC->WUTR      = (uint32_t)0x0000FFFF;
     RTC->DR        = (uint32_t)0x00002101;
     RTC->CR        &= (uint32_t)0x00000000;
     RTC->PRER      = (uint32_t)0x007F00FF;
     RTC->ALRMAR    = (uint32_t)0x00000000;
     RTC->SHIFTR    = (uint32_t)0x00000000;
-    RTC->CAL       = (uint32_t)0x00000000;
+    RTC->CALR       = (uint32_t)0x00000000;
     RTC->ALRMASSR  = (uint32_t)0x00000000;
 
     /* Reset ISR register and exit initialization mode */
@@ -1350,7 +1361,149 @@ uint32_t RTC_GetAlarmSubSecond(uint32_t RTC_Alarm)
   * @}
   */
 
-/** @defgroup RTC_Group4 Daylight Saving configuration functions
+/** @defgroup RTC_Group4 WakeUp Timer configuration functions
+ *  @brief   WakeUp Timer configuration functions 
+ *
+@verbatim   
+ ===============================================================================
+            ##### WakeUp Timer configuration functions #####
+ ===============================================================================  
+
+    [..] This section provide functions allowing to program and read the RTC WakeUp.
+
+@endverbatim
+  * @{
+  */
+
+/**
+  * @brief  Configures the RTC Wakeup clock source.
+  *         This function is available for STM32F072 devices.  
+  * @note   The WakeUp Clock source can only be changed when the RTC WakeUp
+  *         is disabled (Use the RTC_WakeUpCmd(DISABLE)).
+  * @param  RTC_WakeUpClock: Wakeup Clock source.
+  *          This parameter can be one of the following values:
+  *            @arg RTC_WakeUpClock_RTCCLK_Div16
+  *            @arg RTC_WakeUpClock_RTCCLK_Div8
+  *            @arg RTC_WakeUpClock_RTCCLK_Div4
+  *            @arg RTC_WakeUpClock_RTCCLK_Div2
+  *            @arg RTC_WakeUpClock_CK_SPRE_16bits
+  *            @arg RTC_WakeUpClock_CK_SPRE_17bits
+  * @retval None
+  */
+void RTC_WakeUpClockConfig(uint32_t RTC_WakeUpClock)
+{
+  /* Check the parameters */
+  assert_param(IS_RTC_WAKEUP_CLOCK(RTC_WakeUpClock));
+
+  /* Disable the write protection for RTC registers */
+  RTC->WPR = 0xCA;
+  RTC->WPR = 0x53;
+
+  /* Clear the Wakeup Timer clock source bits in CR register */
+  RTC->CR &= (uint32_t)~RTC_CR_WUCKSEL;
+
+  /* Configure the clock source */
+  RTC->CR |= (uint32_t)RTC_WakeUpClock;
+  
+  /* Enable the write protection for RTC registers */
+  RTC->WPR = 0xFF;
+}
+
+/**
+  * @brief  Configures the RTC Wakeup counter.
+  *         This function is available for STM32F072 devices.  
+  * @note   The RTC WakeUp counter can only be written when the RTC WakeUp
+  *         is disabled (Use the RTC_WakeUpCmd(DISABLE)).
+  * @param  RTC_WakeUpCounter: specifies the WakeUp counter.
+  *          This parameter can be a value from 0x0000 to 0xFFFF. 
+  * @retval None
+  */
+void RTC_SetWakeUpCounter(uint32_t RTC_WakeUpCounter)
+{
+  /* Check the parameters */
+  assert_param(IS_RTC_WAKEUP_COUNTER(RTC_WakeUpCounter));
+  
+  /* Disable the write protection for RTC registers */
+  RTC->WPR = 0xCA;
+  RTC->WPR = 0x53;
+  
+  /* Configure the Wakeup Timer counter */
+  RTC->WUTR = (uint32_t)RTC_WakeUpCounter;
+  
+  /* Enable the write protection for RTC registers */
+  RTC->WPR = 0xFF;
+}
+
+/**
+  * @brief  Returns the RTC WakeUp timer counter value.
+  *         This function is available for STM32F072 devices.  
+  * @param  None
+  * @retval The RTC WakeUp Counter value.
+  */
+uint32_t RTC_GetWakeUpCounter(void)
+{
+  /* Get the counter value */
+  return ((uint32_t)(RTC->WUTR & RTC_WUTR_WUT));
+}
+
+/**
+  * @brief  Enables or Disables the RTC WakeUp timer.
+  *         This function is available for STM32F072 devices.  
+  * @param  NewState: new state of the WakeUp timer.
+  *          This parameter can be: ENABLE or DISABLE.
+  * @retval None
+  */
+ErrorStatus RTC_WakeUpCmd(FunctionalState NewState)
+{
+  __IO uint32_t wutcounter = 0x00;
+  uint32_t wutwfstatus = 0x00;
+  ErrorStatus status = ERROR;
+  
+  /* Check the parameters */
+  assert_param(IS_FUNCTIONAL_STATE(NewState));
+
+  /* Disable the write protection for RTC registers */
+  RTC->WPR = 0xCA;
+  RTC->WPR = 0x53;
+
+  if (NewState != DISABLE)
+  {
+    /* Enable the Wakeup Timer */
+    RTC->CR |= (uint32_t)RTC_CR_WUTE;
+    status = SUCCESS;    
+  }
+  else
+  {
+    /* Disable the Wakeup Timer */
+    RTC->CR &= (uint32_t)~RTC_CR_WUTE;
+    /* Wait till RTC WUTWF flag is set and if Time out is reached exit */
+    do
+    {
+      wutwfstatus = RTC->ISR & RTC_ISR_WUTWF;
+      wutcounter++;  
+    } while((wutcounter != INITMODE_TIMEOUT) && (wutwfstatus == 0x00));
+    
+    if ((RTC->ISR & RTC_ISR_WUTWF) == RESET)
+    {
+      status = ERROR;
+    }
+    else
+    {
+      status = SUCCESS;
+    }    
+  }
+
+  /* Enable the write protection for RTC registers */
+  RTC->WPR = 0xFF;
+  
+  return status;
+}
+
+/**
+  * @}
+  */
+
+/** @defgroup RTC_Group5 Daylight Saving configuration functions
  *  @brief   Daylight Saving configuration functions 
  *
 @verbatim   
@@ -1414,7 +1567,7 @@ uint32_t RTC_GetStoreOperation(void)
   * @}
   */
 
-/** @defgroup RTC_Group5 Output pin Configuration function
+/** @defgroup RTC_Group6 Output pin Configuration function
  *  @brief   Output pin Configuration function 
  *
 @verbatim   
@@ -1433,6 +1586,7 @@ uint32_t RTC_GetStoreOperation(void)
   *          This parameter can be one of the following values:
   *            @arg RTC_Output_Disable: No output selected
   *            @arg RTC_Output_AlarmA: signal of AlarmA mapped to output
+  *            @arg RTC_Output_WakeUp: signal of WakeUp mapped to output, available only for STM32F072 devices  
   * @param  RTC_OutputPolarity: Specifies the polarity of the output signal. 
   *          This parameter can be one of the following:
   *            @arg RTC_OutputPolarity_High: The output pin is high when the 
@@ -1581,7 +1735,7 @@ ErrorStatus RTC_SmoothCalibConfig(uint32_t RTC_SmoothCalibPeriod,
   if ((RTC->ISR & RTC_ISR_RECALPF) == RESET)
   {
     /* Configure the Smooth calibration settings */
-    RTC->CAL = (uint32_t)((uint32_t)RTC_SmoothCalibPeriod | (uint32_t)RTC_SmoothCalibPlusPulses | (uint32_t)RTC_SmouthCalibMinusPulsesValue);
+    RTC->CALR = (uint32_t)((uint32_t)RTC_SmoothCalibPeriod | (uint32_t)RTC_SmoothCalibPlusPulses | (uint32_t)RTC_SmouthCalibMinusPulsesValue);
 
     status = SUCCESS;
   }
@@ -1601,7 +1755,7 @@ ErrorStatus RTC_SmoothCalibConfig(uint32_t RTC_SmoothCalibPeriod,
   */
 
 
-/** @defgroup RTC_Group7 TimeStamp configuration functions
+/** @defgroup RTC_Group8 TimeStamp configuration functions
  *  @brief   TimeStamp configuration functions 
  *
 @verbatim   
@@ -1725,7 +1879,7 @@ uint32_t RTC_GetTimeStampSubSecond(void)
   * @}
   */
 
-/** @defgroup RTC_Group8 Tampers configuration functions
+/** @defgroup RTC_Group9 Tampers configuration functions
  *  @brief   Tampers configuration functions 
  *
 @verbatim   
@@ -1932,7 +2086,7 @@ void RTC_TamperPullUpCmd(FunctionalState NewState)
   * @}
   */
 
-/** @defgroup RTC_Group9 Backup Data Registers configuration functions
+/** @defgroup RTC_Group10 Backup Data Registers configuration functions
  *  @brief   Backup Data Registers configuration functions  
  *
 @verbatim   
@@ -1991,7 +2145,7 @@ uint32_t RTC_ReadBackupRegister(uint32_t RTC_BKP_DR)
   * @}
   */
 
-/** @defgroup RTC_Group10 Output Type Config configuration functions
+/** @defgroup RTC_Group11 Output Type Config configuration functions
  *  @brief   Output Type Config configuration functions  
  *
 @verbatim   
@@ -2026,7 +2180,7 @@ void RTC_OutputTypeConfig(uint32_t RTC_OutputType)
   * @}
   */
 
-/** @defgroup RTC_Group11 Shift control synchronisation functions
+/** @defgroup RTC_Group12 Shift control synchronisation functions
  *  @brief   Shift control synchronisation functions 
  *
 @verbatim   
@@ -2112,7 +2266,7 @@ ErrorStatus RTC_SynchroShiftConfig(uint32_t RTC_ShiftAdd1S, uint32_t RTC_ShiftSu
   * @}
   */
 
-/** @defgroup RTC_Group12 Interrupts and flags management functions
+/** @defgroup RTC_Group13 Interrupts and flags management functions
  *  @brief   Interrupts and flags management functions  
  *
 @verbatim   
@@ -2154,6 +2308,7 @@ ErrorStatus RTC_SynchroShiftConfig(uint32_t RTC_ShiftAdd1S, uint32_t RTC_ShiftSu
   * @param  RTC_IT: specifies the RTC interrupt sources to be enabled or disabled. 
   *          This parameter can be any combination of the following values:
   *            @arg RTC_IT_TS:  Time Stamp interrupt mask
+  *            @arg RTC_IT_WUT:  WakeUp Timer interrupt mask, available only for STM32F072 devices  
   *            @arg RTC_IT_ALRA:  Alarm A interrupt mask
   *            @arg RTC_IT_TAMP: Tamper event interrupt mask
   * @param  NewState: new state of the specified RTC interrupts.
@@ -2197,6 +2352,7 @@ void RTC_ITConfig(uint32_t RTC_IT, FunctionalState NewState)
   *            @arg RTC_FLAG_TAMP1F: Tamper 1 event flag
   *            @arg RTC_FLAG_TSOVF: Time Stamp OverFlow flag
   *            @arg RTC_FLAG_TSF: Time Stamp event flag
+  *            @arg RTC_FLAG_WUTF: WakeUp Timer flag, available only for STM32F072 devices  
   *            @arg RTC_FLAG_ALRAF: Alarm A flag
   *            @arg RTC_FLAG_INITF: Initialization mode flag
   *            @arg RTC_FLAG_RSF: Registers Synchronized flag
@@ -2234,6 +2390,7 @@ FlagStatus RTC_GetFlagStatus(uint32_t RTC_FLAG)
   *            @arg RTC_FLAG_TAMP1F: Tamper 1 event flag 
   *            @arg RTC_FLAG_TSOVF: Time Stamp Overflow flag 
   *            @arg RTC_FLAG_TSF: Time Stamp event flag
+  *            @arg RTC_FLAG_WUTF: WakeUp Timer flag, available only for STM32F072 devices  
   *            @arg RTC_FLAG_ALRAF: Alarm A flag
   *            @arg RTC_FLAG_RSF: Registers Synchronized flag
   * @retval None
@@ -2252,6 +2409,7 @@ void RTC_ClearFlag(uint32_t RTC_FLAG)
   * @param  RTC_IT: specifies the RTC interrupt source to check.
   *          This parameter can be one of the following values:
   *            @arg RTC_IT_TS: Time Stamp interrupt
+  *            @arg RTC_IT_WUT: WakeUp Timer interrupt, available only for STM32F072 devices
   *            @arg RTC_IT_ALRA: Alarm A interrupt 
   *            @arg RTC_IT_TAMP1: Tamper1 event interrupt 
   *            @arg RTC_IT_TAMP2: Tamper2 event interrupt 
@@ -2291,6 +2449,7 @@ ITStatus RTC_GetITStatus(uint32_t RTC_IT)
   * @param  RTC_IT: specifies the RTC interrupt pending bit to clear.
   *          This parameter can be any combination of the following values:
   *            @arg RTC_IT_TS: Time Stamp interrupt 
+  *            @arg RTC_IT_WUT: WakeUp Timer interrupt, available only for STM32F072 devices
   *            @arg RTC_IT_ALRA: Alarm A interrupt 
   *            @arg RTC_IT_TAMP1: Tamper1 event interrupt
   *            @arg RTC_IT_TAMP2: Tamper2 event interrupt

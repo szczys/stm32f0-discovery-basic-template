@@ -1,0 +1,9 @@
+*.o
+compile_commands.json
+*.a
+*.bin
+*.elf
+*.hex
+*.lst
+*.map
+*.jlink
